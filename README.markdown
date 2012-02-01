@@ -15,4 +15,4 @@ Related links
 License
 -------
 
-Copyright (c) 2012 tacahiroy. Distributed under the MIT Lisence.
+Copyright (c) 2012 tacahiroy. Distributed under the MIT License.
