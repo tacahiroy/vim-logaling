@@ -1,0 +1,109 @@
+*loga.txt*  A logaling-command wrapper
+
+vim-logaling
+Version: 0.1.0
+Author:  tacahiroy <https://github.com/tacahiroy>
+
+
+==============================================================================
+CONTENTS					*loga-contents*
+
+|loga-intro|		Introduction
+|loga-commands|		Commands
+|loga-settings|		Settings
+|loga-license|		License
+|loga-about|		About
+
+==============================================================================
+INTRODUCTION					*loga-intro*
+
+*vim-logaling* is a simple wrapper of logaling-command.
+It requires Vim 7.2 or later.
+
+This plugin only works if 'compatible' is not set.
+{Vi does not have any of these features.}
+
+
+==============================================================================
+COMMANDS					*loga-commands*
+
+						*loga-:Loga*
+:Loga [command] [args]  Run any logaling-command whatever you want.
+                        Similar to :!loga [command] [args]
+
+						*loga-:Ladd*
+:Ladd {source term} {target term} [note]
+
+						*loga-:Ldelete*
+:Ldelete {source term} [target term] [--force] [args]
+
+						*loga-:Lhelp*
+:Lhelp {command}
+
+						*loga-:Llist*
+:Llist
+
+						*loga-:Llookup*
+:Llookup {term} [args]
+
+						*loga-:Lshow*
+:Lshow  [args]
+
+						*loga-:Lupdate*
+:Lupdate {source term} {target term} {new target term} [note] [args]
+
+
+==============================================================================
+SETTINGS					*loga-settings*
+
+
+g:loga_option					*g:loga_option*
+	This option suppose that logaling-command's global options.
+
+>
+	let g:loga_option = {
+	    \ "-g": "gnome",
+	    \ "-S": "en",
+	    \ "-T": "ja",
+	    \ }
+<
+
+==============================================================================
+LICENSE						*loga-license*
+
+vim-logaling contains a part of source code of quickrun.vim:
+Author: thinca <thinca+vim@gmail.com>.
+URL: https://github.com/thinca/vim-quickrun
+
+
+vim-logaling is released under the MIT license:
+
+Copyright 2012 tacahiroy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+The software is provided "as is", without warranty of any kind, express or
+implied, including but not limited to the warranties of merchantability,
+fitness for a particular purpose and noninfringement. In no event shall the
+authors or copyright holders be liable for any claim, damages or other
+liability, whether in an action of contract, tort or otherwise, arising from,
+out of or in connection with the software or the use or other dealings in the
+software.
+
+
+==============================================================================
+ABOUT                                           *loga-about*
+
+You can get the latest version on GitHub:
+
+https://github.com/tacahiroy/vim-logaling
+
+ vim:tw=78:et:ts=8:ft=help:norl:
