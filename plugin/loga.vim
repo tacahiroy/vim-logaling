@@ -56,11 +56,11 @@ function! s:parse_argument(opt)
   endfor
 
   while i < len(opts)
-    let [o, v] = [get(opts, i), get(opts, i + 1)]
+    let [o, v] = [get(opts, i, ""), get(opts, i + 1, "")]
     let dic = {}
     let dic[o] = (s:is_options_value(v) ? v : "")
 
-    " global config is overwritten if it's set
+    " global settings are overwritten if its're set
     call extend(args, dic)
     let i += (s:is_options_value(v) ? 2 : 1)
   endwhile
@@ -171,6 +171,11 @@ function! s:List() abort
 endfunction
 
 " loga lookup [TERM]
+command! -nargs=+ Llookup call <SID>Lookup(<q-args>)
+function! s:Lookup(opt) abort
+  call s:Loga("lookup", a:opt)
+endfunction
+
 " loga show
 command! -nargs=* Lshow call <SID>Show(<q-args>)
 function! s:Show(opt) abort
