@@ -157,7 +157,6 @@ function! s:Loga(...) abort
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
-" loga config [KEY] [VALUE] [--global(optional)]
 " loga delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]
 " loga help [TASK]
 command! -nargs=1 Lhelp call <SID>Help(<q-args>)
@@ -165,7 +164,6 @@ function! s:Help(command) abort
   call s:Loga("help", a:command)
 endfunction
 
-" loga import
 " loga list
 command! -nargs=* Llist call <SID>List()
 function! s:List() abort
