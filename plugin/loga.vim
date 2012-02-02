@@ -49,7 +49,7 @@ function! s:parse_argument(opt)
   let i = 0
   let args = {}
 
-  for [k, v] in items(g:loga_config)
+  for [k, v] in items(g:loga_option)
     if v != ""
       let args[k] = v
     endif
@@ -172,20 +172,16 @@ function! s:List() abort
 endfunction
 
 " loga lookup [TERM]
-" loga new [PROJECT NAME] [SOURCE LANGUAGE] [TARGET LANGUAGE(optional)]
-" loga register
 " loga show
 command! -nargs=* Lshow call <SID>Show(<q-args>)
 function! s:Show(opt) abort
   call s:Loga("show", a:opt)
 endfunction
 
-" loga unregister
 " loga update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]
-" loga version
-command! -nargs=* Lversion call <SID>Version()
-function! s:Version() abort
-  call s:Loga("version")
+command! -nargs=* Lupdate call <SID>Update(<q-args>)
+function! s:Update(opt) abort
+  call s:Loga("update", a:opt)
 endfunction
 
 " Options:
