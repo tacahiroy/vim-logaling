@@ -17,19 +17,19 @@ CONTENTS					*loga-contents*
 ==============================================================================
 INTRODUCTION					*loga-intro*
 
-*vim-logaling* is a simple wrapper of logaling-command.
-It requires Vim 7.2 or later.
+*vim-logaling* は、シンプルな logaling-command のラッパーです。
+Vim 7.2 以上で動作します。
 
-This plugin only works if 'compatible' is not set.
-{Vi does not have any of these features.}
+このプラグインは、'compatible' がセットされていない場合に限り動作します。
+{Vi は、いくつかの機能を有していません。}
 
 
 ==============================================================================
 COMMANDS					*loga-commands*
 
 						*loga-:Loga*
-:Loga [command] [args]  Run any logaling-command whatever you want.
-                        Similar to :!loga [command] [args]
+:Loga {command} [args]  どんな logaling-command でも実行可能です。
+                        :!loga {command} [args] と似たようなものです。
 
 						*loga-:Ladd*
 :Ladd {source term} {target term} [note]
@@ -47,7 +47,7 @@ COMMANDS					*loga-commands*
 :Llookup {term} [args]
 
 						*loga-:Lshow*
-:Lshow  [args]
+:Lshow [args]
 
 						*loga-:Lupdate*
 :Lupdate {source term} {target term} {new target term} [note] [args]
@@ -58,7 +58,7 @@ SETTINGS					*loga-settings*
 
 
 g:loga_option					*g:loga_option*
-	You can set logaling-command options to this variable.
+	この変数には、logaling-command のオプションを設定可能です。
 
 >
 	let g:loga_option = {
@@ -72,12 +72,12 @@ g:loga_option					*g:loga_option*
 ==============================================================================
 LICENSE						*loga-license*
 
-vim-logaling contains a part of source code of quickrun.vim:
+vim-logaling は、quickrun.vim のソースコードの一部を含んでいます:
 Author: thinca <thinca+vim@gmail.com>.
 URL: https://github.com/thinca/vim-quickrun
 
 
-vim-logaling is released under the MIT license:
+vim-logaling は、MIT license の下でリリースされます:
 
 Copyright 2012 tacahiroy
 
@@ -103,7 +103,7 @@ software.
 ==============================================================================
 ABOUT                                           *loga-about*
 
-You can get the latest version on GitHub:
+最新版は、GitHub で入手できます:
 
 https://github.com/tacahiroy/vim-logaling
 
