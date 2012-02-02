@@ -129,6 +129,7 @@ function! s:loga.output(data)
 
   silent 0 put = a:data
   call cursor(1, 1)
+  redraw!
 endfunction
 
 function! s:loga.clear() dict
