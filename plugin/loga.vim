@@ -28,15 +28,6 @@ let g:loaded_loga = 1
 " vim-users.jp/2011/10/hack239/
 let g:loga_executable = get(g:, "loga_executable", "loga")
 
-" TODO: long name option support
-" loga global options
-" Options:
-"   -g, [--glossary=GLOSSARY]
-"   -S, [--source-language=SOURCE-LANGUAGE]
-"   -T, [--target-language=TARGET-LANGUAGE]
-"   -h, [--logaling-home=LOGALING-HOME]
-let g:loga_general_flags = get(g:, "loga_general_flags", {})
-
 " behaviour settings
 " open: split[default]|vsplit(string)
 " size: width/height(integer)
@@ -100,7 +91,7 @@ endfunction
 let s:loga = {"executable": "",
             \ "subcommand": "",
             \ "args": [],
-            \ "options": {}}
+            \ }
 
 " methods
 function! s:loga.initialize(subcmd, args) dict
@@ -108,12 +99,10 @@ function! s:loga.initialize(subcmd, args) dict
 
   let self.executable = g:loga_executable
   let self.subcommand = a:subcmd
-  let self.options = deepcopy(g:loga_general_flags)
 
   if 0 < len(a:args)
     let self.args = a:args
   endif
-  call self.merge_arguments()
 endfunction
 
 function! s:loga.build_command() dict
@@ -159,23 +148,6 @@ function! s:loga.clear() dict
   let self.executable = ""
   let self.subcommand = ""
   let self.args = []
-  let self.options = {}
-endfunction
-
-function! s:loga.merge_arguments() dict
-  " overwrite global option with argument if the same option was specified
-  for [name, val] in items(self.options)
-    let is_specified = 0
-    for [c1, c2] in self.args
-      if c1 == name
-        let is_specified = 1
-        break
-      endif
-    endfor
-    if !is_specified
-      call add(self.args, [name, val])
-    endif
-  endfor
 endfunction
 " }}}
 
