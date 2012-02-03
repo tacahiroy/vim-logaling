@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.1.0
+Version: 0.2.0
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -55,25 +55,27 @@ COMMANDS					*loga-commands*
 
 ==============================================================================
 SETTINGS					*loga-settings*
+変数を使用することで、|vim-logaling|の挙動を変更することができます。
 
 
-g:loga_option					*g:loga_option*
-	この変数には、logaling-command のオプションを設定可能です。
-
+g:loga_result_window					*g:loga_result_window*
+	結果ウィンドウの開き方を設定します。|split|か|vsplit|を想定しています。
+	また、ウィンドウの幅/高さを指定することができます。
 >
-	let g:loga_option = {
-	    \ "-g": "gnome",
-	    \ "-S": "en",
-	    \ "-T": "ja",
-	    \ "-h": "/path/to/logaling/home",
+	open:		開き方(split|vsplit) [初期値:split]
+	size:		サイズ(数値) [初期値:5]
+
+	let g:loga_result_window = {
+	    \ "open": "vsplit",
+	    \ "size": 50
 	    \ }
 <
 
 ==============================================================================
 LICENSE						*loga-license*
 
-vim-logaling は、quickrun.vim のソースコードの一部を含んでいます:
-Author: thinca <thinca+vim@gmail.com>.
+vim-logaling は、一部、quickrun.vim のソースコードを含んでいます:
+Author: thinca
 URL: https://github.com/thinca/vim-quickrun
 
 
@@ -103,7 +105,7 @@ software.
 ==============================================================================
 ABOUT                                           *loga-about*
 
-最新版は、GitHub で入手できます:
+最新版は、GitHub より入手できます:
 
 https://github.com/tacahiroy/vim-logaling
 

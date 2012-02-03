@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.1.0
+Version: 0.2.0
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -55,17 +55,18 @@ COMMANDS					*loga-commands*
 
 ==============================================================================
 SETTINGS					*loga-settings*
+To control behaviour of|vim-logaling|, use these variables.
 
 
-g:loga_option					*g:loga_option*
-	You can set logaling-command options to this variable.
-
+g:loga_result_window					*g:loga_result_window*
+	You can control how to open the result window and size.
 >
-	let g:loga_option = {
-	    \ "-g": "gnome",
-	    \ "-S": "en",
-	    \ "-T": "ja",
-	    \ "-h": "/path/to/logaling/home",
+	open:		how to open the window (split|vsplit) [default:split]
+	size:		window size (number) [default:5]
+
+	let g:loga_result_window = {
+	    \ "open": "vsplit",
+	    \ "size": 50
 	    \ }
 <
 
