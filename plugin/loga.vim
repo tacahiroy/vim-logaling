@@ -31,8 +31,8 @@ let g:loga_executable = get(g:, "loga_executable", "loga")
 " behaviour settings
 " open: split[default]|vsplit(string)
 " size: width/height(integer)
-let g:loga_result_buffer = get(g:, "loga_result_buffer", {"open": "split",
-      \ "size": 10,})
+let g:loga_result_buffer = get(g:, "loga_result_buffer",
+                                \ {"open": "split", "size": 5})
 
 
 " Utilities "{{{
