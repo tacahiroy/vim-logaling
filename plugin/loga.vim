@@ -1,5 +1,5 @@
 " loga.vim - A logaling-command wrapper
-" Maintainer:   tacahiroy <tacahiroy```AT```gmail.com>
+" Maintainer: tacahiroy <tacahiroy```AT```gmail.com>
 " License: MIT License " {{{
 " Permission is hereby granted, free of charge, to any person obtaining a copy
 " of this software and associated documentation files (the "Software"), to deal
@@ -18,16 +18,23 @@
 " liability, whether in an action of contract, tort or otherwise, arising from,
 " out of or in connection with the software or the use or other dealings in the
 " software. " }}}
-" Version:      0.1.0
+" Version: 0.2.0
 
-if exists('g:loaded_loga') || &cp
+if exists("g:loaded_loga") || &cp
   finish
 endif
 let g:loaded_loga = 1
 
 " vim-users.jp/2011/10/hack239/
 let g:loga_executable = get(g:, "loga_executable", "loga")
-" loga global options(-g, -S, -T, -h)
+
+" TODO: long name option support
+" loga global options
+" Options:
+"   -g, [--glossary=GLOSSARY]
+"   -S, [--source-language=SOURCE-LANGUAGE]
+"   -T, [--target-language=TARGET-LANGUAGE]
+"   -h, [--logaling-home=LOGALING-HOME]
 let g:loga_command_option = get(g:, "loga_command_option", {})
 " settings for behaviour
 let g:loga_config = get(g:, "loga_config", {})
@@ -86,7 +93,7 @@ let s:loga = {"executable": "",
             \ "args": [],
             \ "options": {}}
 
-" methods {{{
+" methods
 function! s:loga.initialize(subcmd, args) dict
   call self.clear()
 
@@ -166,6 +173,7 @@ function! s:loga.merge_arguments() dict
     endif
   endfor
 endfunction
+" }}}
 
 " commands "{{{
 command! -nargs=+ Loga call <SID>Loga(<q-args>)
@@ -210,12 +218,6 @@ command! -nargs=+ Lupdate call <SID>Update(<q-args>)
 function! s:Update(opt) abort
   call s:Loga("update", a:opt)
 endfunction
-
-" Options:
-"   -g, [--glossary=GLOSSARY]
-"   -S, [--source-language=SOURCE-LANGUAGE]
-"   -T, [--target-language=TARGET-LANGUAGE]
-"   -h, [--logaling-home=LOGALING-HOME]
 
 "}}}
 
