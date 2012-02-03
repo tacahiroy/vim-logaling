@@ -7,10 +7,10 @@
 " to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 " copies of the Software, and to permit persons to whom the Software is
 " furnished to do so, subject to the following conditions:
-" 
+"
 " The above copyright notice and this permission notice shall be included in all
 " copies or substantial portions of the Software.
-" 
+"
 " The software is provided "as is", without warranty of any kind, express or
 " implied, including but not limited to the warranties of merchantability,
 " fitness for a particular purpose and noninfringement. In no event shall the
@@ -36,8 +36,13 @@ let g:loga_executable = get(g:, "loga_executable", "loga")
 "   -T, [--target-language=TARGET-LANGUAGE]
 "   -h, [--logaling-home=LOGALING-HOME]
 let g:loga_command_option = get(g:, "loga_command_option", {})
-" settings for behaviour
-let g:loga_config = get(g:, "loga_config", {})
+
+" behaviour settings
+" open: split[default]|vsplit(string)
+" size: width/height(integer)
+let g:loga_result_buffer = get(g:, "loga_result_buffer", {"open": "split",
+      \ "size": 10,})
+
 
 " Utilities "{{{
 """
@@ -87,6 +92,10 @@ function! s:output_buffer.exists() dict
   return bufexists(self.bufnr)
 endfunction
 
+function! s:output_buffer.is_open() dict
+  return bufwinnr(self.bufnr) != -1
+endfunction
+
 " s:loga " {{{
 let s:loga = {"executable": "",
             \ "subcommand": "",
@@ -125,22 +134,17 @@ function! s:loga.execute() dict
 endfunction
 
 function! s:loga.output(data)
-  let bufwinnr = bufwinnr(s:output_buffer.bufnr)
-
-  " FIXME: don't recyle! -> bufwinnr
-  if bufwinnr == -1
-    silent split
+  if !s:output_buffer.is_open()
+    silent execute g:loga_result_buffer.size . g:loga_result_buffer.open
     silent edit `=s:output_buffer.BUFNAME`
 
-    if !s:output_buffer.exists()
-      let s:output_buffer.bufnr = bufnr('%')
-    endif
-
-    let bufwinnr = bufwinnr(s:output_buffer.bufnr)
+    let s:output_buffer.bufnr = bufnr(s:output_buffer.BUFNAME)
   endif
 
+  let bufwinnr = bufwinnr(s:output_buffer.bufnr)
+
   execute bufwinnr . "wincmd w"
-  execute "%delete"
+  execute "%delete _"
 
   setlocal buftype=nofile syntax=none bufhidden=hide
   setlocal noswapfile nobuflisted
