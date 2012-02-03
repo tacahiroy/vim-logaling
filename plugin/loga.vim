@@ -35,7 +35,7 @@ let g:loga_executable = get(g:, "loga_executable", "loga")
 "   -S, [--source-language=SOURCE-LANGUAGE]
 "   -T, [--target-language=TARGET-LANGUAGE]
 "   -h, [--logaling-home=LOGALING-HOME]
-let g:loga_command_option = get(g:, "loga_command_option", {})
+let g:loga_general_flags = get(g:, "loga_general_flags", {})
 
 " behaviour settings
 " open: split[default]|vsplit(string)
@@ -108,7 +108,7 @@ function! s:loga.initialize(subcmd, args) dict
 
   let self.executable = g:loga_executable
   let self.subcommand = a:subcmd
-  let self.options = deepcopy(g:loga_command_option)
+  let self.options = deepcopy(g:loga_general_flags)
 
   if 0 < len(a:args)
     let self.args = a:args
