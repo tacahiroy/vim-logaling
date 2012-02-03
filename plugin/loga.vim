@@ -28,8 +28,9 @@ let g:loaded_loga = 1
 " vim-users.jp/2011/10/hack239/
 let g:loga_executable = get(g:, "loga_executable", "loga")
 " loga global options(-g, -S, -T, -h)
-let g:loga_option = get(g:, "loga_option", {})
-let g:loga_= get(g:, "loga_behave", {})
+let g:loga_command_option = get(g:, "loga_command_option", {})
+" settings for behaviour
+let g:loga_config = get(g:, "loga_config", {})
 
 " Utilities "{{{
 """
@@ -42,27 +43,21 @@ endfunction
 """
 " command argument parser
 " @arg: opt(string) - command option like this '-i -t TITLE'
+" @return: List[[]]
 function! s:parse_argument(opt)
-  let opt = s:gsub(a:opt, "\s\s\+", " ")
+  let opts = split(s:gsub(a:opt, "\s\s\+", " "), " ")
 
-  let opts = split(opt, " ")
   let i = 0
-  let args = {}
-
-  for [k, v] in items(g:loga_option)
-    if v != ""
-      let args[k] = v
-    endif
-  endfor
+  let args = []
 
   while i < len(opts)
-    let [o, v] = [get(opts, i, ""), get(opts, i + 1, "")]
-    let dic = {}
-    let dic[o] = (s:is_options_value(v) ? v : "")
+    let name = get(opts, i, "")
+    let rval = get(opts, i + 1, "")
+    let value = (s:is_options_value(rval) ? rval : "")
 
-    " global settings are overwritten if its're set
-    call extend(args, dic)
-    let i += (s:is_options_value(v) ? 2 : 1)
+    call add(args, [name, value])
+
+    let i += (s:is_options_value(rval) ? 2 : 1)
   endwhile
 
   return args
@@ -85,39 +80,55 @@ function! s:output_buffer.exists() dict
   return bufexists(self.bufnr)
 endfunction
 
-let s:loga = {"subcommand": "",
-      \ "args": ""}
+" s:loga " {{{
+let s:loga = {"executable": "",
+            \ "subcommand": "",
+            \ "args": [],
+            \ "options": {}}
 
-function! s:loga.build_args() dict
-  let args = ""
-  for [opt, val] in items(self.args)
-    let args .= printf("%s %s ", opt, val)
+" methods {{{
+function! s:loga.initialize(subcmd, args) dict
+  call self.clear()
+
+  let self.executable = g:loga_executable
+  let self.subcommand = a:subcmd
+  let self.options = deepcopy(g:loga_command_option)
+
+  if 0 < len(a:args)
+    let self.args = a:args
+  endif
+  call self.merge_arguments()
+endfunction
+
+function! s:loga.build_command() dict
+  let cmd = printf("%s %s", self.executable, self.subcommand)
+  let arg = ""
+
+  for [k, v] in self.args
+    let arg .= k . " " . v
   endfor
-  return args
+  return cmd . " " . arg
 endfunction
 
 function! s:loga.execute() dict
-  let args = self.build_args()
-  let temp = tempname()
-
-  silent execute printf(":!%s %s %s > %s", g:loga_executable, self.subcommand, args, temp)
-  let result = join(readfile(temp, "b"), "\n")
+  let cmd = self.build_command()
+  let result = system(cmd)
 
   call self.output(result)
-
-  call delete(temp)
 endfunction
 
 function! s:loga.output(data)
-  let cur_bufname = bufname('%')
-
   let bufwinnr = bufwinnr(s:output_buffer.bufnr)
+
+  " FIXME: don't recyle! -> bufwinnr
   if bufwinnr == -1
     silent split
     silent edit `=s:output_buffer.BUFNAME`
+
     if !s:output_buffer.exists()
       let s:output_buffer.bufnr = bufnr('%')
     endif
+
     let bufwinnr = bufwinnr(s:output_buffer.bufnr)
   endif
 
@@ -128,22 +139,32 @@ function! s:loga.output(data)
   setlocal noswapfile nobuflisted
 
   silent 0 put = a:data
+
   call cursor(1, 1)
   redraw!
 endfunction
 
 function! s:loga.clear() dict
+  let self.executable = ""
   let self.subcommand = ""
-  let self.args = {}
+  let self.args = []
+  let self.options = {}
 endfunction
 
-function! s:loga.initialize(subcmd, args) dict
-  call self.clear()
-  let self.subcommand = a:subcmd
-
-  if 0 < len(a:args)
-    let self.args = a:args
-  endif
+function! s:loga.merge_arguments() dict
+  " overwrite global option with argument if the same option was specified
+  for [name, val] in items(self.options)
+    let is_specified = 0
+    for [c1, c2] in self.args
+      if c1 == name
+        let is_specified = 1
+        break
+      endif
+    endfor
+    if !is_specified
+      call add(self.args, [name, val])
+    endif
+  endfor
 endfunction
 
 " commands "{{{
@@ -152,6 +173,8 @@ function! s:Loga(...) abort
   let args = a:000
   let subcmd = get(args, 0)
   let arg = get(args, 1, "")
+
+
   call s:loga.initialize(subcmd, s:parse_argument(arg))
   call s:loga.execute()
 endfunction
@@ -183,7 +206,7 @@ function! s:Show(opt) abort
 endfunction
 
 " loga update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]
-command! -nargs=* Lupdate call <SID>Update(<q-args>)
+command! -nargs=+ Lupdate call <SID>Update(<q-args>)
 function! s:Update(opt) abort
   call s:Loga("update", a:opt)
 endfunction
