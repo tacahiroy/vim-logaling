@@ -15,8 +15,7 @@ let g:loga_result_window_hsplit = get(g:, "loga_result_window_hsplit", 1)
 let g:loga_result_window_size   = get(g:, "loga_result_window_size", 5)
 
 " auto lookup
-let g:loga_enable_auto_lookup = get(g:, "loga_enable_auto_lookup", 0)
-let g:loga_auto_lookup_line   = get(g:, "loga_auto_lookup_line", 0)
+let s:loga_enable_auto_lookup = get(g:, "loga_enable_auto_lookup", 0)
 
 " Utilities "{{{
 """
@@ -25,6 +24,16 @@ function! s:gsub(s, p, r) abort
   return substitute(a:s, "\v\C".a:p, a:r, "g")
 endfunction
 "}}}
+
+function! s:enable_auto_lookup()
+  let s:loga_enable_auto_lookup = 1
+endfunction
+function! s:disable_auto_lookup()
+  let s:loga_enable_auto_lookup = 0
+endfunction
+function! s:toggle_auto_lookup()
+  let s:loga_enable_auto_lookup = !s:loga_enable_auto_lookup
+endfunction
 
 """
 " argument parser
@@ -142,56 +151,89 @@ endfunction
 " }}}
 
 " commands "{{{
-command! -nargs=+ Loga call <SID>Loga(<q-args>)
-function! s:Loga(...) abort
+function! s:loga.Run(...) dict abort
   let args = a:000
   let subcmd = get(args, 0)
   let arg = get(args, 1, "")
 
-  call s:loga.initialize(subcmd, s:parse_argument(arg))
-  return s:loga.execute()
+  call self.initialize(subcmd, s:parse_argument(arg))
+  let res = self.execute()
+  call s:output(res)
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
-command! -nargs=+ Ladd call <SID>Add(<q-args>)
-function! s:Add(opt) abort
-  let res = s:Loga("add", a:opt)
-  call s:output(res)
+function! s:loga.Add(opt) dict abort
+  call self.Run("add", a:opt)
 endfunction
 
 " loga delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]
-command! -nargs=+ Ldelete call <SID>Delete(<q-args>)
-function! s:Delete(opt) abort
-  let res = s:Loga("delete", a:opt)
-  call s:output(res)
+function! s:loga.Delete(opt) dict abort
+  call self.Run("delete", a:opt)
 endfunction
 
 " loga help [TASK]
-command! -nargs=1 Lhelp call <SID>Help(<q-args>)
-function! s:Help(command) abort
-  call s:output(s:Loga("help", a:command))
+function! s:loga.Help(command) dict abort
+  call self.Run("help", a:command)
 endfunction
 
 " loga lookup [TERM]
-command! -nargs=+ Llookup call <SID>Lookup(<q-args>)
-function! s:Lookup(opt) abort
-  let res = s:Loga("lookup", a:opt)
-  call s:output(res)
+function! s:loga.Lookup(opt) dict abort
+  call self.Run("lookup", a:opt)
+endfunction
+function! s:loga.AutoLookup(term) dict abort
+  if s:loga_enable_auto_lookup && !empty(a:term)
+    call self.Run("lookup", a:term)
+  endif
 endfunction
 
 " loga show
-command! -nargs=* Lshow call <SID>Show(<q-args>)
-function! s:Show(opt) abort
-  call s:output(s:Loga("show", a:opt))
+function! s:loga.Show(opt) dict abort
+  call self.Run("show", a:opt)
 endfunction
 
 " loga update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]
-command! -nargs=+ Lupdate call <SID>Update(<q-args>)
-function! s:Update(opt) abort
-  call s:output(s:Loga("update", a:opt))
+function! s:loga.Update(opt) dict abort
+  call self.Run("update", a:opt)
 endfunction
-
 "}}}
+
+" Highlight " {{{
+function! s:syntax()
+  syntax match LogaGlossary '\t\zs(.\+)$'
+  highlight link LogaGlossary Constant
+  " if hlexists('Normal')
+  "   sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
+  " en
+endf
+
+fu! s:highlight(pat, grp)
+  cal clearmatches()
+  if !empty(a:pat) && s:ispathitem()
+    let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
+    " Match only filename
+    if s:byfname
+      let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
+      let pat = substitute(pat, '$', '\\ze[^\\/]*$', 'g')
+    en
+    cal matchadd(a:grp, '\c'.pat)
+    cal matchadd('CtrlPLinePre', '^>')
+  en
+endfunction
+" }}}
+
+" commands " {{{
+command! -nargs=+ Loga    call <SID>loga.Run(<q-args>)
+command! -nargs=+ Ladd    call <SID>loga.Add(<q-args>)
+command! -nargs=+ Ldelete call <SID>loga.Delete(<q-args>)
+command! -nargs=1 Lhelp   call <SID>loga.Help(<q-args>)
+command! -nargs=+ Llookup call <SID>loga.Lookup(<q-args>)
+command! -nargs=* Lshow   call <SID>loga.Show(<q-args>)
+command! -nargs=+ Lupdate call <SID>loga.Update(<q-args>)
+
+command! -nargs=0 LenableAutoLookUp  call <SID>enable_auto_lookup()
+command! -nargs=0 LdisableAutoLookUp call <SID>disable_auto_lookup()
+command! -nargs=0 LtoggleAutoLookUp  call <SID>toggle_auto_lookup()
+" }}}
 
 " mappings " {{{
 nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute "Llookup " . expand("<cword>")<Cr>
@@ -201,11 +243,9 @@ if !hasmapto("<Plug>(loga-lookup)")
 endif
 " }}}
 
-if g:loga_enable_auto_lookup
-  augroup Loga
-    autocmd! CursorHold * call s:Lookup(expand("<cword>"))
-  augroup END
-endif
+augroup Loga
+  autocmd! CursorHold * call s:loga.AutoLookup(expand("<cword>"))
+augroup END
 
 "__END__
 " vim:set ft=vim ts=2 sw=2 sts=2:
