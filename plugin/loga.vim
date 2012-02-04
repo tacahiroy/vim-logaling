@@ -29,14 +29,12 @@ let g:loaded_loga = 1
 let g:loga_executable = get(g:, "loga_executable", "loga")
 
 " behaviour settings
-" open: split[default]|vsplit(string)
-" size: width/height(integer)
-let g:loga_result_window = get(g:, "loga_result_window",
-                                \ {"open": "split", "size": 5})
+let g:loga_result_window_hsplit = get(g:, "loga_result_window_hsplit", 1)
+let g:loga_result_window_size   = get(g:, "loga_result_window_size", 5)
 
-" auto lookup word under cursor
-let g:loga_auto_lookup = get(g:, "loga_auto_lookup", 0)
-
+" auto lookup
+let g:loga_enable_auto_lookup = get(g:, "loga_enable_auto_lookup", 0)
+let g:loga_auto_lookup_line   = get(g:, "loga_auto_lookup_line", 0)
 
 " Utilities "{{{
 """
@@ -120,16 +118,15 @@ endfunction
 
 function! s:loga.execute() dict
   let cmd = self.build_command()
-  let result = system(cmd)
-
-  call self.output(result)
+  return system(cmd)
 endfunction
 
 function! s:loga.output(data)
   let cur_bufnr = bufnr("%")
 
   if !s:output_buffer.is_open()
-    silent execute g:loga_result_window.size . g:loga_result_window.open
+    let split = (g:loga_result_window_hsplit ? "split" : "vsplit")
+    silent execute g:loga_result_window_size . split
     silent edit `=s:output_buffer.BUFNAME`
 
     let s:output_buffer.bufnr = bufnr("%")
@@ -167,7 +164,8 @@ function! s:Loga(...) abort
 
 
   call s:loga.initialize(subcmd, s:parse_argument(arg))
-  call s:loga.execute()
+  let res = s:loga.execute()
+  call s:loga.output(res)
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
@@ -212,8 +210,11 @@ if !hasmapto("<Plug>(loga-lookup)")
 endif
 " }}}
 
-if g:loga_auto_lookup
-  autocmd! CursorHold * call s:Lookup(expand("<cword>"))
+if g:loga_enable_auto_lookup
+  if g:loga_auto_lookup_line
+  else
+    autocmd! CursorHold * call s:Lookup(expand("<cword>"))
+  endif
 endif
 
 "__END__
