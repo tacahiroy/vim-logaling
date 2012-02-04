@@ -123,6 +123,8 @@ function! s:loga.execute() dict
 endfunction
 
 function! s:loga.output(data)
+  let cur_bufnr = bufnr("%")
+
   if !s:output_buffer.is_open()
     silent execute g:loga_result_window.size . g:loga_result_window.open
     silent edit `=s:output_buffer.BUFNAME`
@@ -141,6 +143,8 @@ function! s:loga.output(data)
   silent 0 put = a:data
 
   call cursor(1, 1)
+  execute bufwinnr(cur_bufnr). "wincmd w"
+
   redraw!
 endfunction
 
@@ -196,5 +200,13 @@ function! s:Update(opt) abort
 endfunction
 
 "}}}
+
+" mappings " {{{
+nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute "Llookup " . expand("<cword>")<Cr>
+
+if !hasmapto("<Plug>(loga-lookup)")
+  silent! map <unique> <Leader>f <Plug>(loga-lookup)
+endif
+" }}}
 
 " vim:set ft=vim ts=2 sw=2 sts=2:
