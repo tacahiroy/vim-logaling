@@ -198,7 +198,7 @@ endfunction
 "}}}
 
 " Highlight " {{{
-function! s:syntax()
+function! g:syntax()
   syntax match LogaGlossary '\t\zs(.\+)$'
   highlight link LogaGlossary Constant
   " if hlexists('Normal')
@@ -222,13 +222,13 @@ endfunction
 " }}}
 
 " commands " {{{
-command! -nargs=+ Loga    call <SID>loga.Run(<q-args>)
-command! -nargs=+ Ladd    call <SID>loga.Add(<q-args>)
-command! -nargs=+ Ldelete call <SID>loga.Delete(<q-args>)
-command! -nargs=1 Lhelp   call <SID>loga.Help(<q-args>)
-command! -nargs=+ Llookup call <SID>loga.Lookup(<q-args>)
-command! -nargs=* Lshow   call <SID>loga.Show(<q-args>)
-command! -nargs=+ Lupdate call <SID>loga.Update(<q-args>)
+command! -nargs=+ Loga    call s:loga.Run(<q-args>)
+command! -nargs=+ Ladd    call s:loga.Add(<q-args>)
+command! -nargs=+ Ldelete call s:loga.Delete(<q-args>)
+command! -nargs=1 Lhelp   call s:loga.Help(<q-args>)
+command! -nargs=+ Llookup call s:loga.Lookup(<q-args>)
+command! -nargs=* Lshow   call s:loga.Show(<q-args>)
+command! -nargs=+ Lupdate call s:loga.Update(<q-args>)
 
 command! -nargs=0 LenableAutoLookUp  call <SID>enable_auto_lookup()
 command! -nargs=0 LdisableAutoLookUp call <SID>disable_auto_lookup()
