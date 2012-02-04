@@ -55,20 +55,19 @@ COMMANDS					*loga-commands*
 
 ==============================================================================
 SETTINGS					*loga-settings*
-To control behaviour of|vim-logaling|, use these variables.
+These variables control behaviour of the |vim-logaling|.
 
 
-g:loga_result_window					*g:loga_result_window*
-	You can control how to open the result window and size.
->
-	open:		how to open the window (split|vsplit) [default:split]
-	size:		window size (number) [default:5]
+						*g:loga_result_window_hsplit*  >
+  g:loga_result_window_hsplit = 1
+<	This variable controls split direction of a result window.
+	If it's 1, window is split horizontal. If not, vertical.
 
-	let g:loga_result_window = {
-	    \ "open": "vsplit",
-	    \ "size": 50
-	    \ }
-<
+						*g:loga_result_window_size*  >
+  g:loga_result_window_size = 5
+<	This variable controls size of a result window.
+	Only an integer can be specified.
+
 
 ==============================================================================
 LICENSE						*loga-license*
