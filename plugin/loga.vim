@@ -49,9 +49,40 @@ function! s:parse_argument(opt)
   return args
 endfunction
 
+function! s:output(data)
+  if empty(a:data)
+    return
+  endif
+
+  let cur_bufnr = bufnr("%")
+
+  if !s:output_buffer.is_open()
+    let split = (g:loga_result_window_hsplit ? "split" : "vsplit")
+    silent execute g:loga_result_window_size . split
+    silent edit `=s:output_buffer.BUFNAME`
+
+    let s:output_buffer.bufnr = bufnr("%")
+  endif
+
+  let bufwinnr = bufwinnr(s:output_buffer.bufnr)
+
+  execute bufwinnr . "wincmd w"
+  silent execute "%delete _"
+
+  setlocal buftype=nofile syntax=none bufhidden=hide
+  setlocal noswapfile nobuflisted
+
+  silent 0 put = a:data
+
+  call cursor(1, 1)
+  execute bufwinnr(cur_bufnr). "wincmd w"
+
+  redraw!
+endfunction
+
 """
-" judge v is option(e.g. '-s' of '-s ja') or
-" option's value(e.g. 'ja' of '-s ja')
+" judge v is an option(e.g. "-s" of "-s ja") or
+" option's value(e.g. "ja" of "-s ja")
 " @arg: v(string)
 " @return: 1 if v is value, 0 if not
 function! s:is_options_value(v)
@@ -103,33 +134,6 @@ function! s:loga.execute() dict
   return system(cmd)
 endfunction
 
-function! s:loga.output(data)
-  let cur_bufnr = bufnr("%")
-
-  if !s:output_buffer.is_open()
-    let split = (g:loga_result_window_hsplit ? "split" : "vsplit")
-    silent execute g:loga_result_window_size . split
-    silent edit `=s:output_buffer.BUFNAME`
-
-    let s:output_buffer.bufnr = bufnr("%")
-  endif
-
-  let bufwinnr = bufwinnr(s:output_buffer.bufnr)
-
-  execute bufwinnr . "wincmd w"
-  silent execute "%delete _"
-
-  setlocal buftype=nofile syntax=none bufhidden=hide
-  setlocal noswapfile nobuflisted
-
-  silent 0 put = a:data
-
-  call cursor(1, 1)
-  execute bufwinnr(cur_bufnr). "wincmd w"
-
-  redraw!
-endfunction
-
 function! s:loga.clear() dict
   let self.executable = ""
   let self.subcommand = ""
@@ -144,46 +148,47 @@ function! s:Loga(...) abort
   let subcmd = get(args, 0)
   let arg = get(args, 1, "")
 
-
   call s:loga.initialize(subcmd, s:parse_argument(arg))
-  let res = s:loga.execute()
-  if 0 < len(res)
-    call s:loga.output(res)
-  else
-    echo "No results"
-  endif
+  return s:loga.execute()
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
+command! -nargs=+ Ladd call <SID>Add(<q-args>)
+function! s:Add(opt) abort
+  let res = s:Loga("add", a:opt)
+  call s:output(res)
+endfunction
+
 " loga delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]
+command! -nargs=+ Ldelete call <SID>Delete(<q-args>)
+function! s:Delete(opt) abort
+  let res = s:Loga("delete", a:opt)
+  call s:output(res)
+endfunction
+
 " loga help [TASK]
 command! -nargs=1 Lhelp call <SID>Help(<q-args>)
 function! s:Help(command) abort
-  call s:Loga("help", a:command)
-endfunction
-
-" loga list
-command! -nargs=* Llist call <SID>List()
-function! s:List() abort
-  call s:Loga("list")
+  call s:output(s:Loga("help", a:command))
 endfunction
 
 " loga lookup [TERM]
 command! -nargs=+ Llookup call <SID>Lookup(<q-args>)
 function! s:Lookup(opt) abort
-  call s:Loga("lookup", a:opt)
+  let res = s:Loga("lookup", a:opt)
+  call s:output(res)
 endfunction
 
 " loga show
 command! -nargs=* Lshow call <SID>Show(<q-args>)
 function! s:Show(opt) abort
-  call s:Loga("show", a:opt)
+  call s:output(s:Loga("show", a:opt))
 endfunction
 
 " loga update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]
 command! -nargs=+ Lupdate call <SID>Update(<q-args>)
 function! s:Update(opt) abort
-  call s:Loga("update", a:opt)
+  call s:output(s:Loga("update", a:opt))
 endfunction
 
 "}}}
