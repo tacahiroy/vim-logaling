@@ -28,29 +28,33 @@ Vim 7.2 以上で動作します。
 COMMANDS					*loga-commands*
 
 						*loga-:Loga*
-:Loga {command} [args]  どんな logaling-command でも実行可能です。
-                        :!loga {command} [args] と似たようなものです。
+:Loga {command} [args]
+	任意の logaling-command でも実行可能です。
+	:!loga {command} [options] と似たようなものです。
 
-						*loga-:Ladd*
+						*loga-:Ladd* *loga-add*
 :Ladd {source term} {target term} [note]
+	'loga add' を実行します。
 
-						*loga-:Ldelete*
-:Ldelete {source term} [target term] [--force] [args]
+						*loga-:Lupdate* *loga-update*
+:Lupdate {source term} {target term} {new target term} [note] [options]
+	'loga update' を実行します。
 
-						*loga-:Lhelp*
+						*loga-:Ldelete* *loga-delete*
+:Ldelete {source term} [target term] [--force] [options]
+	'loga delete' を実行します。
+
+						*loga-:Lhelp* *loga-help*
 :Lhelp {command}
+	'loga help' を実行します。
 
-						*loga-:Llist*
-:Llist
+						*loga-:Llookup* *loga-lookup*
+:Llookup {term} [options]
+	'loga lookup' を実行します。
 
-						*loga-:Llookup*
-:Llookup {term} [args]
-
-						*loga-:Lshow*
-:Lshow [args]
-
-						*loga-:Lupdate*
-:Lupdate {source term} {target term} {new target term} [note] [args]
+						*loga-:Lshow* *loga-show*
+:Lshow [options]
+	'loga show' を実行します。
 
 
 ==============================================================================
@@ -58,16 +62,20 @@ SETTINGS					*loga-settings*
 設定により、|vim-logaling|いくつかの挙動を変更することができます。
 
 
-						*g:loga_result_window_hsplit*  >
-  g:loga_result_window_hsplit = 1
-<	結果ウィンドウの分轄方向を制御することができます。
-	1 に設定されている場合は水平方向、
-	0 に設定されている場合は垂直方向に分轄して開きます。
+						*g:loga_result_window_hsplit*
+結果ウィンドウの分轄方向を制御することができます。
+1 に設定されている場合は水平方向、
+0 に設定されている場合は垂直方向に分轄して開きます。
+>
+	let g:loga_result_window_hsplit = 1
+<
 
-						*g:loga_result_window_size*  >
-  g:loga_result_window_size = 5
-<	結果ウィンドウのサイズ(幅/高さ)を制御することができます。
-	整数値を指定してください。
+						*g:loga_result_window_size*
+結果ウィンドウのサイズ(幅/高さ)を制御することができます。
+整数値を指定してください。
+>
+	let g:loga_result_window_size = 5
+<
 
 
 ==============================================================================
@@ -78,7 +86,7 @@ Author: thinca
 URL: https://github.com/thinca/vim-quickrun
 
 
-vim-logaling は、MIT license の下でリリースされます:
+vim-logaling は、MIT License の下でリリースされます:
 
 Copyright 2012 tacahiroy
 

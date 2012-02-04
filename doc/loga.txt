@@ -28,29 +28,33 @@ This plugin only works if 'compatible' is not set.
 COMMANDS					*loga-commands*
 
 						*loga-:Loga*
-:Loga [command] [args]  Run any logaling-command whatever you want.
-                        Similar to :!loga [command] [args]
+:Loga {command} [args]
+	Run any logaling-command whatever you want.
+	Similar to :!loga {command} [args]
 
-						*loga-:Ladd*
+						*loga-:Ladd* *loga-add*
 :Ladd {source term} {target term} [note]
+	Just execute command 'loga add'.
 
-						*loga-:Ldelete*
-:Ldelete {source term} [target term] [--force] [args]
+						*loga-:Lupdate* *loga-update*
+:Lupdate {source term} {target term} {new target term} [note] [options]
+	Just execute command 'loga update'.
 
-						*loga-:Lhelp*
+						*loga-:Ldelete* *loga-delete*
+:Ldelete {source term} [target term] [--force] [options]
+	Just execute command 'loga delete'.
+
+						*loga-:Lhelp* *loga-help*
 :Lhelp {command}
+	Just execute command 'loga help'.
 
-						*loga-:Llist*
-:Llist
+						*loga-:Llookup* *loga-lookup*
+:Llookup {term} [options]
+	Just execute command 'loga lookup'.
 
-						*loga-:Llookup*
-:Llookup {term} [args]
-
-						*loga-:Lshow*
-:Lshow  [args]
-
-						*loga-:Lupdate*
-:Lupdate {source term} {target term} {new target term} [note] [args]
+						*loga-:Lshow* *loga-show*
+:Lshow [options]
+	Just execute command 'loga show'.
 
 
 ==============================================================================
@@ -58,26 +62,30 @@ SETTINGS					*loga-settings*
 These variables control behaviour of the |vim-logaling|.
 
 
-						*g:loga_result_window_hsplit*  >
-  g:loga_result_window_hsplit = 1
-<	This variable controls split direction of a result window.
-	If it's 1, window is split horizontal. If not, vertical.
+						*g:loga_result_window_hsplit* 
+This variable controls split direction of a result window.
+If it's 1, window is split horizontal. If not, vertical.
+>
+	let g:loga_result_window_hsplit = 1
+<
 
-						*g:loga_result_window_size*  >
-  g:loga_result_window_size = 5
-<	This variable controls size of a result window.
-	Only an integer can be specified.
+						*g:loga_result_window_size* 
+This variable controls size of a result window.
+Only an integer can be specified.
+>
+	let g:loga_result_window_size = 5
+<
 
 
 ==============================================================================
 LICENSE						*loga-license*
 
 vim-logaling contains a part of source code of quickrun.vim:
-Author: thinca <thinca+vim@gmail.com>.
+Author: thinca
 URL: https://github.com/thinca/vim-quickrun
 
 
-vim-logaling is released under the MIT license:
+vim-logaling is released under the MIT License:
 
 Copyright 2012 tacahiroy
 
