@@ -31,7 +31,7 @@ let g:loga_executable = get(g:, "loga_executable", "loga")
 " behaviour settings
 " open: split[default]|vsplit(string)
 " size: width/height(integer)
-let g:loga_result_buffer = get(g:, "loga_result_buffer",
+let g:loga_result_window = get(g:, "loga_result_window",
                                 \ {"open": "split", "size": 5})
 
 
@@ -124,10 +124,10 @@ endfunction
 
 function! s:loga.output(data)
   if !s:output_buffer.is_open()
-    silent execute g:loga_result_buffer.size . g:loga_result_buffer.open
+    silent execute g:loga_result_window.size . g:loga_result_window.open
     silent edit `=s:output_buffer.BUFNAME`
 
-    let s:output_buffer.bufnr = bufnr(s:output_buffer.BUFNAME)
+    let s:output_buffer.bufnr = bufnr("%")
   endif
 
   let bufwinnr = bufwinnr(s:output_buffer.bufnr)
