@@ -138,7 +138,7 @@ function! s:loga.output(data)
   let bufwinnr = bufwinnr(s:output_buffer.bufnr)
 
   execute bufwinnr . "wincmd w"
-  execute "%delete _"
+  silent execute "%delete _"
 
   setlocal buftype=nofile syntax=none bufhidden=hide
   setlocal noswapfile nobuflisted
@@ -210,11 +210,11 @@ nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute "Llookup " . expand("<cword>
 if !hasmapto("<Plug>(loga-lookup)")
   silent! map <unique> <Leader>f <Plug>(loga-lookup)
 endif
+" }}}
 
 if g:loga_auto_lookup
   autocmd! CursorHold * call s:Lookup(expand("<cword>"))
 endif
 
-" }}}
-
+"__END__
 " vim:set ft=vim ts=2 sw=2 sts=2:
