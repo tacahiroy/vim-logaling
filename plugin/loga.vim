@@ -34,6 +34,9 @@ let g:loga_executable = get(g:, "loga_executable", "loga")
 let g:loga_result_window = get(g:, "loga_result_window",
                                 \ {"open": "split", "size": 5})
 
+" auto lookup word under cursor
+let g:loga_auto_lookup = get(g:, "loga_auto_lookup", 0)
+
 
 " Utilities "{{{
 """
@@ -207,6 +210,11 @@ nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute "Llookup " . expand("<cword>
 if !hasmapto("<Plug>(loga-lookup)")
   silent! map <unique> <Leader>f <Plug>(loga-lookup)
 endif
+
+if g:loga_auto_lookup
+  autocmd! CursorHold * call s:Lookup(expand("<cword>"))
+endif
+
 " }}}
 
 " vim:set ft=vim ts=2 sw=2 sts=2:
