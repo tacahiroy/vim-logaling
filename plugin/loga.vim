@@ -165,7 +165,11 @@ function! s:Loga(...) abort
 
   call s:loga.initialize(subcmd, s:parse_argument(arg))
   let res = s:loga.execute()
-  call s:loga.output(res)
+  if 0 < len(res)
+    call s:loga.output(res)
+  else
+    echo "No results"
+  endif
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
