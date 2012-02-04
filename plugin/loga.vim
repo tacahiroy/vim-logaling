@@ -213,7 +213,9 @@ endif
 if g:loga_enable_auto_lookup
   if g:loga_auto_lookup_line
   else
-    autocmd! CursorHold * call s:Lookup(expand("<cword>"))
+    augroup Loga
+      autocmd! CursorHold * call s:Lookup(expand("<cword>"))
+    augroup END
   endif
 endif
 
