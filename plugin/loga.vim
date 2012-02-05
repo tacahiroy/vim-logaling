@@ -153,24 +153,20 @@ endfunction
 " }}}
 
 " commands "{{{
-function! s:loga.Run(...) dict abort
-  let g:log = a:000
-  let args = a:000
-  let subcmd = get(args, 0)
-
-  call self.initialize(subcmd, s:parse_argument(s:V.flatten(args[1:])))
+function! s:loga.Run(subcmd, ...) dict abort
+  call self.initialize(a:subcmd, s:parse_argument(s:V.flatten(a:000[:])))
   let res = self.execute()
   call s:output(res)
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
-function! s:loga.Add(opt) dict abort
-  call self.Run("add", a:opt)
+function! s:loga.Add(src, target, ...) dict abort
+  call self.Run("add", a:src, a:target, a:000)
 endfunction
 
 " loga delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]
-function! s:loga.Delete(opt) dict abort
-  call self.Run("delete", a:opt)
+function! s:loga.Delete(src, target, ...) dict abort
+  call self.Run("delete", a:src, a:target, a:000)
 endfunction
 
 " loga help [TASK]
@@ -193,13 +189,13 @@ function! s:loga.AutoLookup(term) dict abort
 endfunction
 
 " loga show
-function! s:loga.Show(opt) dict abort
-  call self.Run("show", a:opt)
+function! s:loga.Show(...) dict abort
+  call self.Run("show", a:000)
 endfunction
 
 " loga update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]
-function! s:loga.Update(opt) dict abort
-  call self.Run("update", a:opt)
+function! s:loga.Update(src, target, new_target, ...) dict abort
+  call self.Run("update", a:src, a:target, a:new_target, a:000)
 endfunction
 "}}}
 
@@ -265,7 +261,7 @@ command! -nargs=0 LtoggleAutoLookUp  call <SID>toggle_auto_lookup()
 " }}}
 
 " mappings " {{{
-nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute "Llookup " . expand("<cword>")<Cr>
+nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute "Llookup ". expand("<cword>")<Cr>
 
 if !hasmapto("<Plug>(loga-lookup)")
   silent! map <unique> <Leader>f <Plug>(loga-lookup)
