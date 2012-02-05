@@ -8,6 +8,9 @@ if exists("g:loaded_loga") || &cp
 endif
 let g:loaded_loga = 1
 
+let s:V = vital#of("loga").import("Data.List")
+
+
 let g:loga_executable = get(g:, "loga_executable", "loga")
 
 " behaviour settings
@@ -37,13 +40,12 @@ endfunction
 
 """
 " argument parser
-" @arg: opt(string) - command option like this "-i -t TITLE"
+" @arg: opts(List) - command option like this ["-i", "-t", "TITLE"]
 " @return: List[[]]
-function! s:parse_argument(opt)
-  let opts = split(s:gsub(a:opt, "\s\s\+", " "), " ")
-
+function! s:parse_argument(opts)
   let i = 0
   let args = []
+  let opts = a:opts
 
   while i < len(opts)
     let name = get(opts, i, "")
@@ -152,11 +154,11 @@ endfunction
 
 " commands "{{{
 function! s:loga.Run(...) dict abort
+  let g:log = a:000
   let args = a:000
   let subcmd = get(args, 0)
-  let arg = get(args, 1, "")
 
-  call self.initialize(subcmd, s:parse_argument(arg))
+  call self.initialize(subcmd, s:parse_argument(s:V.flatten(args[1:])))
   let res = self.execute()
   call s:output(res)
 endfunction
@@ -177,10 +179,14 @@ function! s:loga.Help(command) dict abort
 endfunction
 
 " loga lookup [TERM]
-function! s:loga.Lookup(opt) dict abort
-  call self.Run("lookup", a:opt)
+function! s:loga.Lookup(word, ...) dict abort
+  call self.Run("lookup", a:word, a:000)
 endfunction
 function! s:loga.AutoLookup(term) dict abort
+  if s:output_buffer.bufnr == bufnr("%")
+    return
+  endif
+
   if s:loga_enable_auto_lookup && !empty(a:term)
     call self.Run("lookup", a:term)
   endif
@@ -221,14 +227,37 @@ fu! s:highlight(pat, grp)
 endfunction
 " }}}
 
+let s:loga_tasks = ["add",
+                  \ "config",
+                  \ "delete",
+                  \ "help",
+                  \ "import",
+                  \ "list",
+                  \ "lookup",
+                  \ "new",
+                  \ "register",
+                  \ "show",
+                  \ "unregister",
+                  \ "update",
+                  \ "version"]
+
+function! s:complete_tasks(lead, cline, cpos)
+  if empty(a:lead)
+    return s:loga_tasks
+  else
+    return filter(copy(s:loga_tasks), "v:val =~# '^'.a:lead")
+  endif
+endfunction
+
 " commands " {{{
-command! -nargs=+ Loga    call s:loga.Run(<q-args>)
-command! -nargs=+ Ladd    call s:loga.Add(<q-args>)
-command! -nargs=+ Ldelete call s:loga.Delete(<q-args>)
-command! -nargs=1 Lhelp   call s:loga.Help(<q-args>)
-command! -nargs=+ Llookup call s:loga.Lookup(<q-args>)
-command! -nargs=* Lshow   call s:loga.Show(<q-args>)
-command! -nargs=+ Lupdate call s:loga.Update(<q-args>)
+command! -nargs=+ -complete=customlist,s:complete_tasks
+      \ Loga call s:loga.Run(<f-args>)
+command! -nargs=+ Ladd    call s:loga.Add(<f-args>)
+command! -nargs=+ Ldelete call s:loga.Delete(<f-args>)
+command! -nargs=1 Lhelp   call s:loga.Help(<f-args>)
+command! -nargs=+ Llookup call s:loga.Lookup(<f-args>)
+command! -nargs=* Lshow   call s:loga.Show(<f-args>)
+command! -nargs=+ Lupdate call s:loga.Update(<f-args>)
 
 command! -nargs=0 LenableAutoLookUp  call <SID>enable_auto_lookup()
 command! -nargs=0 LdisableAutoLookUp call <SID>disable_auto_lookup()
