@@ -1,7 +1,8 @@
 " loga.vim - A logaling-command wrapper
-" Maintainer: tacahiroy <tacahiroy```AT```gmail.com>
+" Maintainer: Takahiro YOSHIHARA <tacahiroy```AT```gmail.com>
 " License: MIT License
 " Version: 0.2.0
+" supported logaling-command version 0.1.2
 
 if exists("g:loaded_loga") || &cp
   finish
@@ -80,8 +81,9 @@ function! s:output(data)
   execute bufwinnr . "wincmd w"
   silent execute "%delete _"
 
-  setlocal buftype=nofile syntax=none bufhidden=hide
+  setlocal buftype=nofile syntax=loga bufhidden=hide
   setlocal noswapfile nobuflisted
+  call s:enable_syntax()
 
   silent 0 put = a:data
 
@@ -142,7 +144,12 @@ endfunction
 
 function! s:loga.execute() dict
   let cmd = self.build_command()
-  return system(cmd)
+  let result = system(cmd)
+  return [result, self.is_error(result)]
+endfunction
+
+function! s:loga.is_error(result)
+  return a:result =~# '"\(\w\+\)" was called incorrectly\. Call as "loga \1'
 endfunction
 
 function! s:loga.clear() dict
@@ -154,77 +161,74 @@ endfunction
 
 " commands "{{{
 function! s:loga.Run(...) dict abort
-  let g:log = a:000
-  let args = a:000
-  let subcmd = get(args, 0)
+  let subcmd = get(a:000, 0)
 
-  call self.initialize(subcmd, s:parse_argument(s:V.flatten(args[1:])))
-  let res = self.execute()
+  call self.initialize(subcmd, s:parse_argument(s:V.flatten(a:000[1:])))
+  return self.execute()
+endfunction
+
+" loga
+function! s:loga.Loga(task, ...) dict abort
+  let [res, err] = self.Run(a:task, a:000)
   call s:output(res)
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
 function! s:loga.Add(opt) dict abort
-  call self.Run("add", a:opt)
+  let [res, err] = self.Run("add", a:opt)
+  call s:output(res)
 endfunction
 
 " loga delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]
 function! s:loga.Delete(opt) dict abort
-  call self.Run("delete", a:opt)
+  let [res, err] = self.Run("delete", a:opt)
+  call s:output(res)
 endfunction
 
 " loga help [TASK]
 function! s:loga.Help(command) dict abort
-  call self.Run("help", a:command)
+  let [res, err] = self.Run("help", a:command)
+  call s:output(res)
 endfunction
 
 " loga lookup [TERM]
 function! s:loga.Lookup(word, ...) dict abort
-  call self.Run("lookup", a:word, a:000)
+  let [res, err] = self.Run("lookup", a:word, a:000)
+  call s:output(res)
 endfunction
 function! s:loga.AutoLookup(term) dict abort
+  " do not lookup yourself
   if s:output_buffer.bufnr == bufnr("%")
     return
   endif
 
   if s:loga_enable_auto_lookup && !empty(a:term)
-    call self.Run("lookup", a:term)
+    let [res, err] = self.Run("lookup", a:term)
+    call s:output(res)
   endif
 endfunction
 
 " loga show
-function! s:loga.Show(opt) dict abort
-  call self.Run("show", a:opt)
+function! s:loga.Show(...) dict abort
+  let [res, err] = self.Run("show", a:000)
+  call s:output(res)
 endfunction
 
 " loga update [SOURCE TERM] [TARGET TERM] [NEW TARGET TERM], [NOTE(optional)]
 function! s:loga.Update(opt) dict abort
-  call self.Run("update", a:opt)
+  let [res, err] = self.Run("update", a:opt)
+  call s:output(res)
 endfunction
 "}}}
 
 " Highlight " {{{
-function! g:syntax()
+function! s:enable_syntax()
+  syntax match LogaTargetTerm '\s\{11,}\zs[^\t]\+\ze'
   syntax match LogaGlossary '\t\zs(.\+)$'
-  highlight link LogaGlossary Constant
-  " if hlexists('Normal')
-  "   sil! exe 'hi CtrlPLinePre '.( has("gui_running") ? 'gui' : 'cterm' ).'fg=bg'
-  " en
-endf
 
-fu! s:highlight(pat, grp)
-  cal clearmatches()
-  if !empty(a:pat) && s:ispathitem()
-    let pat = s:regexp ? substitute(a:pat, '\\\@<!\^', '^> \\zs', 'g') : a:pat
-    " Match only filename
-    if s:byfname
-      let pat = substitute(pat, '\[\^\(.\{-}\)\]\\{-}', '[^\\/\1]\\{-}', 'g')
-      let pat = substitute(pat, '$', '\\ze[^\\/]*$', 'g')
-    en
-    cal matchadd(a:grp, '\c'.pat)
-    cal matchadd('CtrlPLinePre', '^>')
-  en
-endfunction
+  highlight link LogaTargetTerm Constant
+  highlight link LogaGlossary Type
+endf
 " }}}
 
 let s:loga_tasks = ["add",
@@ -241,22 +245,102 @@ let s:loga_tasks = ["add",
                   \ "update",
                   \ "version"]
 
-function! s:complete_tasks(lead, cline, cpos)
-  if empty(a:lead)
+let s:gflags = ["-g", "-S", "-T", "-h",
+              \ "--glossary=", "--source-language=",
+              \ "--target-language=", "--logaling-home="]
+
+function! s:is_task_given(line)
+  let parts = split(a:line, '\s\+')
+  return (0 <= index(s:loga_tasks, get(parts, 1, "")))
+endfunction
+
+function! s:get_source_terms(word)
+  " TODO: implement caching
+  let res = ""
+  let err = 0
+
+  if a:word == ""
+    let [res, err] = s:loga.Run("show")
+  else
+    let [res, err] = s:loga.Run("lookup", a:word)
+  endif
+
+  let terms = []
+  for e in split(res, '\n')
+    let term = substitute(e, '\m\s\{11,}[^\t]\+\(\t#\s.*\)\?', '', '')
+    let term = substitute(term, '\m^\s\s', '', '')
+    call add(terms, '"'.term.'"')
+  endfor
+  return terms
+endfunction
+
+function! s:get_target_terms(word)
+  " TODO: implement caching
+  let [res, err] = s:loga.Run("lookup", a:word)
+  let terms = []
+  for e in split(res, '\n')
+    let term = substitute(e, '\m^\s\s.\+\s\{11,}\([^\t]\+\)\(\t#\s.*\)\?$', '\1', '')
+    call add(terms, '"'.term.'"')
+  endfor
+  return terms
+endfunction
+
+function! s:get_tasks(L)
+  if empty(a:L)
     return s:loga_tasks
   else
-    return filter(copy(s:loga_tasks), "v:val =~# '^'.a:lead")
+    return filter(copy(s:loga_tasks), "v:val =~# '^'.a:L")
   endif
 endfunction
 
+" complete functions " {{{
+function! s:complete_loga(A, L, P)
+  if s:is_task_given(a:A)
+  else
+    return s:get_tasks(a:A)
+  endif
+endfunction
+
+function! s:complete_show(A, L, P)
+
+endfunction
+
+function! s:complete_help(A, L, P)
+  return s:get_tasks(a:A)
+endfunction
+
+function! s:complete_lookup(A, L, P)
+  let level = len(split(substitute(a:L, '^Loga\s\+', 'Loga', ''), '\s\+'))
+  let alead = substitute(a:A, '^[\"'']\([^\"'']*\)$', '"\1"', '')
+
+  if level == 1 || len(a:L) == a:P
+    " :Llookup
+    " :Loga lookup
+    return s:get_source_terms(alead)
+  elseif level == 2
+    " :Llookup "source"
+    " :Loga lookup "source"
+    " TODO: global flags completion
+  endif
+endfunction
+" }}}
+
 " commands " {{{
-command! -nargs=+ -complete=customlist,s:complete_tasks
-      \ Loga call s:loga.Run(<f-args>)
+command! -nargs=+ -complete=customlist,s:complete_loga
+      \ Loga call s:loga.Loga(<f-args>)
+
 command! -nargs=+ Ladd    call s:loga.Add(<f-args>)
 command! -nargs=+ Ldelete call s:loga.Delete(<f-args>)
-command! -nargs=1 Lhelp   call s:loga.Help(<f-args>)
-command! -nargs=+ Llookup call s:loga.Lookup(<f-args>)
-command! -nargs=* Lshow   call s:loga.Show(<f-args>)
+
+command! -nargs=1 -complete=customlist,s:complete_help
+      \ Lhelp call s:loga.Help(<f-args>)
+
+command! -nargs=+ -complete=customlist,s:complete_lookup
+      \ Llookup call s:loga.Lookup(<f-args>)
+
+command! -nargs=* -complete=customlist,s:complete_show
+      \ Lshow call s:loga.Show(<f-args>)
+
 command! -nargs=+ Lupdate call s:loga.Update(<f-args>)
 
 command! -nargs=0 LenableAutoLookUp  call <SID>enable_auto_lookup()
