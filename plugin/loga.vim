@@ -296,13 +296,14 @@ endfunction
 " complete functions " {{{
 function! s:complete_loga(A, L, P)
   if s:is_task_given(a:A)
+    " TODO: each task completion
   else
     return s:get_tasks(a:A)
   endif
 endfunction
 
 function! s:complete_show(A, L, P)
-
+  " only global flags
 endfunction
 
 function! s:complete_help(A, L, P)
@@ -310,18 +311,45 @@ function! s:complete_help(A, L, P)
 endfunction
 
 function! s:complete_lookup(A, L, P)
+  if len(a:L) != a:P
+    return
+  endif
+
   let level = len(split(substitute(a:L, '^Loga\s\+', 'Loga', ''), '\s\+'))
   let alead = substitute(a:A, '^[\"'']\([^\"'']*\)$', '"\1"', '')
 
-  if level == 1 || len(a:L) == a:P
+  if level == 1
+    " :Llookup
+    " :Loga lookup
+    return s:get_source_terms(alead)
+  elseif 2 <= level
+    " TODO: global flags completion
+  endif
+endfunction
+
+function! s:complete_delete(A, L, P)
+  if len(a:L) != a:P
+    return
+  endif
+
+  let level = len(split(substitute(a:L, '^Loga\s\+', 'Loga', ''), '\s\+'))
+  let alead = substitute(a:A, '^[\"'']\([^\"'']*\)$', '"\1"', '')
+
+  let is_completed = (a:L =~# '\s$')
+
+  if level == 1 || (level == 2 && !is_completed)
     " :Llookup
     " :Loga lookup
     return s:get_source_terms(alead)
   elseif level == 2
-    " :Llookup "source"
-    " :Loga lookup "source"
+    " TODO: target term completion
+  elseif 3 <= level
     " TODO: global flags completion
   endif
+endfunction
+
+function! s:complete_update(A, L, P)
+  return s:complete_delete(a:A, a:L, a:P)
 endfunction
 " }}}
 
@@ -329,8 +357,9 @@ endfunction
 command! -nargs=+ -complete=customlist,s:complete_loga
       \ Loga call s:loga.Loga(<f-args>)
 
-command! -nargs=+ Ladd    call s:loga.Add(<f-args>)
-command! -nargs=+ Ldelete call s:loga.Delete(<f-args>)
+command! -nargs=+ Ladd call s:loga.Add(<f-args>)
+command! -nargs=+ -complete=customlist,s:complete_delete
+      \ Ldelete call s:loga.Delete(<f-args>)
 
 command! -nargs=1 -complete=customlist,s:complete_help
       \ Lhelp call s:loga.Help(<f-args>)
@@ -341,7 +370,8 @@ command! -nargs=+ -complete=customlist,s:complete_lookup
 command! -nargs=* -complete=customlist,s:complete_show
       \ Lshow call s:loga.Show(<f-args>)
 
-command! -nargs=+ Lupdate call s:loga.Update(<f-args>)
+command! -nargs=+ -complete=customlist,s:complete_delete
+      \ Lupdate call s:loga.Update(<f-args>)
 
 command! -nargs=0 LenableAutoLookUp  call <SID>enable_auto_lookup()
 command! -nargs=0 LdisableAutoLookUp call <SID>disable_auto_lookup()
