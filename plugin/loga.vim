@@ -193,7 +193,7 @@ function! s:loga.Lookup(word, ...) dict abort
   call s:output(res)
 endfunction
 function! s:loga.AutoLookup(term) dict abort
-  ' do not lookup yourself
+  " do not lookup yourself
   if s:output_buffer.bufnr == bufnr('%')
     return
   endif
@@ -251,7 +251,7 @@ function! s:is_task_given(line)
 endfunction
 
 function! s:get_source_terms(word)
-  ' TODO: implement caching
+  " TODO: implement caching
   let res = ''
   let err = 0
 
