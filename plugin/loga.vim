@@ -130,12 +130,9 @@ endfunction
 
 function! s:loga.build_command() dict
   let cmd = printf('%s %s', self.executable, self.subcommand)
-  let arg = ''
+  let args = join(s:V.flatten(self.args), ' ')
 
-  for [k, v] in self.args
-    let arg .= k . ' ' . v
-  endfor
-  return cmd . ' ' . arg
+  return cmd . ' ' . args
 endfunction
 
 function! s:loga.execute() dict
