@@ -64,15 +64,15 @@ function! s:output(data)
 
   let cur_bufnr = bufnr('%')
 
-  if !s:output_buffer.is_open()
+  if !s:loga.buffer.is_open()
     let split = (g:loga_result_window_hsplit ? 'split' : 'vsplit')
     silent execute g:loga_result_window_size . split
-    silent edit `=s:output_buffer.BUFNAME`
+    silent edit `=s:loga.buffer.NAME`
 
-    let s:output_buffer.bufnr = bufnr('%')
+    let s:loga.buffer.number = bufnr('%')
   endif
 
-  let bufwinnr = bufwinnr(s:output_buffer.bufnr)
+  let bufwinnr = bufwinnr(s:loga.buffer.number)
 
   execute bufwinnr . 'wincmd w'
   silent execute '%delete _'
@@ -98,23 +98,33 @@ function! s:is_options_value(v)
   return a:v !~# '^-'
 endfunction
 
-" objects
-let s:output_buffer = {'bufnr': -1,
-      \ 'BUFNAME': '[loga output]'}
-
-function! s:output_buffer.exists() dict
-  return bufexists(self.bufnr)
-endfunction
-
-function! s:output_buffer.is_open() dict
-  return bufwinnr(self.bufnr) != -1
-endfunction
-
-" s:loga " {{{
+" objects " {{{
 let s:loga = {'executable': '',
             \ 'subcommand': '',
             \ 'args': [],
+            \ 'buffer': {},
             \ }
+
+let s:loga.buffer = {'number': -1,
+      \ 'NAME': '[logaling]'}
+
+function! s:loga.buffer.exists() dict
+  return bufexists(self.number)
+endfunction
+
+function! s:loga.buffer.is_open() dict
+  return bufwinnr(self.number) != -1
+endfunction
+
+function! s:loga.buffer.execute(subcmd, lnum) dict
+  let line = getbufline(self.number, a:lnum)[0]
+  let args = split(line, '\s\{2,}')
+  let [res, err] = s:loga.Run(a:subcmd, args)
+  echomsg res
+endfunction
+command! Tyoss call s:loga.buffer.execute('update', line('.'))
+command! DDD call s:loga.buffer.execute('delete', line('.'))
+
 
 " methods
 function! s:loga.initialize(subcmd, args) dict
@@ -191,7 +201,7 @@ function! s:loga.Lookup(word, ...) dict abort
 endfunction
 function! s:loga.AutoLookup(term) dict abort
   " do not lookup yourself
-  if s:output_buffer.bufnr == bufnr('%')
+  if s:loga.buffer.number == bufnr('%')
     return
   endif
 
@@ -242,6 +252,7 @@ let s:gflags = ['-g', '-S', '-T', '-h',
               \ '--glossary=', '--source-language=',
               \ '--target-language=', '--logaling-home=']
 
+" Completion related " {{{
 function! s:is_task_given(line)
   let parts = split(a:line, '\s\+')
   return (0 <= index(s:loga_tasks, get(parts, 1, '')))
@@ -345,6 +356,7 @@ function! s:complete_update(A, L, P)
   return s:complete_delete(a:A, a:L, a:P)
 endfunction
 " }}}
+" }}}
 
 " commands " {{{
 command! -nargs=+ -complete=customlist,s:complete_loga
@@ -384,4 +396,4 @@ augroup Loga
 augroup END
 
 "__END__
-" vim:set ft=vim ts=2 sw=2 sts=2:
+" vim: fen fdm=marker ft=vim ts=2 sw=2 sts=2:
