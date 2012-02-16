@@ -22,7 +22,10 @@ let g:loga_result_window_size   = get(g:, 'loga_result_window_size', 5)
 let s:loga_enable_auto_lookup = get(g:, 'loga_enable_auto_lookup', 0)
 
 " Utilities "{{{
-"""
+function! s:debug(...)
+  let g:debug = get(g:, 'debug', [])
+  call add(g:debug, a:000)
+endfunction
 "}}}
 
 function! s:enable_auto_lookup()
@@ -106,7 +109,9 @@ let s:loga = {'executable': '',
             \ }
 
 let s:loga.buffer = {'number': -1,
-      \ 'NAME': '[logaling]'}
+                   \ 'DELIMITER': get(g:, 'loga_delimiter', '//'),
+                   \ 'NAME': '[logaling]',
+                   \ 'filter': {}}
 
 function! s:loga.buffer.exists() dict
   return bufexists(self.number)
@@ -116,14 +121,33 @@ function! s:loga.buffer.is_open() dict
   return bufwinnr(self.number) != -1
 endfunction
 
-function! s:loga.buffer.execute(subcmd, lnum) dict
-  let line = getbufline(self.number, a:lnum)[0]
-  let args = split(line, '\s\{2,}')
-  let [res, err] = s:loga.Run(a:subcmd, args)
-  echomsg res
+function! s:loga.buffer.filter.delete(line)
+  return substitute(a:line, '\s\+#.*$', '', '')
 endfunction
-command! Tyoss call s:loga.buffer.execute('update', line('.'))
-command! DDD call s:loga.buffer.execute('delete', line('.'))
+
+function! s:loga.buffer.execute(subcmd) range dict
+  for lnum in range(a:firstline, a:lastline)
+    let line = get(getbufline(self.number, lnum), 0)
+
+    if empty(line)
+      continue
+    endif
+
+    if get(self.filter, a:subcmd)
+      let line = self.filter[a:subcmd](line)
+    endif
+
+    let line = substitute(line, '\s\{2,}', '  ', 'g')
+    let line = substitute(line, '# \ze.\+$', '  ', '')
+
+    let args = split(line, '\s\{2,}')
+    let [res, err] = s:loga.Run(a:subcmd, args)
+  endfor
+endfunction
+
+command! -range LBadd    <line1>,<line2>call s:loga.buffer.execute('add')
+command! -range LBupdate <line1>,<line2>call s:loga.buffer.execute('update')
+command! -range LBdelete <line1>,<line2>call s:loga.buffer.execute('delete')
 
 
 " methods
@@ -142,12 +166,13 @@ function! s:loga.build_command() dict
   let cmd = printf('%s %s', self.executable, self.subcommand)
   let args = join(s:V.flatten(self.args), ' ')
 
+  call s:debug(cmd . ' ' . args)
   return cmd . ' ' . args
 endfunction
 
 function! s:loga.execute() dict
   let cmd = self.build_command()
-  let result = system(cmd)
+  let result = substitute(system(cmd), '\t# ', '  # ', 'g')
   return [result, self.is_error(result)]
 endfunction
 
@@ -177,14 +202,14 @@ function! s:loga.Loga(task, ...) dict abort
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
-function! s:loga.Add(opt) dict abort
-  let [res, err] = self.Run('add', a:opt)
+function! s:loga.Add(src, target, ...) dict abort
+  let [res, err] = self.Run('add', a:src, a:target, a:000)
   call s:output(res)
 endfunction
 
 " loga delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]
-function! s:loga.Delete(opt) dict abort
-  let [res, err] = self.Run('delete', a:opt)
+function! s:loga.Delete(term, ...) dict abort
+  let [res, err] = self.Run('delete', a:term, a:000)
   call s:output(res)
 endfunction
 
@@ -226,11 +251,13 @@ endfunction
 
 " Highlight " {{{
 function! s:enable_syntax()
-  syntax match LogaTargetTerm '\s\{11,}\zs[^\t]\+\ze'
   syntax match LogaGlossary '\t\zs(.\+)$'
+  syntax match LogaTargetTerm '\s\{11,}\zs[^#]\+\ze'
+  syntax match LogaNote '\s#\s.\+$'
 
-  highlight link LogaTargetTerm Constant
   highlight link LogaGlossary Type
+  highlight link LogaTargetTerm Constant
+  highlight link LogaNote String
 endf
 " }}}
 
