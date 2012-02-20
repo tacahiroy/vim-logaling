@@ -30,10 +30,11 @@
   - [ ] general flags
 
  * [ ] バッファ内で編集 -> コマンド実行モードの実装
-  - [ ] add
-  - [ ] update
-  - [ ] delete
+  - [x] add
+  - [x] update
+  - [x] delete
   # インターフェースを考える
+  [x] 区切り文字の指定を可能に
 
  * [ ] Llookup 時の単語ハイライト
 
