@@ -123,7 +123,7 @@ function! s:loga.buffer.open(clear) dict
     let self.number = bufnr('%')
 
     setlocal buftype=nofile syntax=loga bufhidden=hide
-    setlocal filetype=loga
+    setlocal filetype=logaing
     setlocal noswapfile nobuflisted
     call s:enable_syntax()
 
@@ -443,13 +443,10 @@ command! -nargs=0 LtoggleAutoLookUp  call <SID>toggle_auto_lookup()
 " mappings " {{{
 nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute 'Llookup '. expand("<cword>")<Cr>
 if !hasmapto('<Plug>(loga-lookup)')
-  silent! map <unique> <Leader>f <Plug>(loga-lookup)
+  silent! nmap <unique> <Leader>f <Plug>(loga-lookup)
 endif
 
 execute 'inoremap <silent> <Plug>(loga-insert-delimiter) ' . s:loga_delimiter
-if !hasmapto('<Plug>(loga-insert-delimiter)')
-  silent! imap <unique> <Leader>v <Plug>(loga-insert-delimiter)
-endif
 " }}}
 
 augroup Loga
@@ -457,11 +454,16 @@ augroup Loga
 
   autocmd CursorHold * call s:loga.AutoLookup(expand('<cword>'))
 
-  autocmd FileType loga command! -range -nargs=0 -buffer
+  if !hasmapto('<Plug>(loga-insert-delimiter)')
+    autocmd FileType logaling
+          \ silent! imap <unique> <Leader>v <Plug>(loga-insert-delimiter)
+  endif
+
+  autocmd FileType logaing command! -range -nargs=0 -buffer
         \ LBadd    <line1>,<line2>call s:loga.buffer.execute('add')
-  autocmd FileType loga command! -range -nargs=0 -buffer
+  autocmd FileType logaing command! -range -nargs=0 -buffer
         \ LBupdate <line1>,<line2>call s:loga.buffer.execute('update')
-  autocmd FileType loga command! -range -nargs=0 -buffer
+  autocmd FileType logaing command! -range -nargs=0 -buffer
         \ LBdelete <line1>,<line2>call s:loga.buffer.execute('delete')
 augroup END
 
