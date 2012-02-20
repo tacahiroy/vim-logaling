@@ -1,7 +1,7 @@
 " loga.vim - A logaling-command wrapper
 " Maintainer: Takahiro YOSHIHARA <tacahiroy```AT```gmail.com>
 " License: MIT License
-" Version: 0.2.2
+" Version: 0.3.0
 " supported logaling-command version 0.1.2
 
 if exists('g:loaded_loga') || &cp
@@ -21,7 +21,7 @@ let g:loga_result_window_size   = get(g:, 'loga_result_window_size', 5)
 " auto lookup
 let s:loga_enable_auto_lookup = get(g:, 'loga_enable_auto_lookup', 0)
 
-let s:loga_delimiter = get(g:, 'loga_delimiter', '(__vimloga__)')
+let s:loga_delimiter = get(g:, 'loga_delimiter', '(__loga__)')
 
 " Utilities "{{{
 function! s:debug(...)
