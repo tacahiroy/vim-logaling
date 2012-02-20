@@ -1,0 +1,42 @@
+ * [ ] [loga result] バッファの開き方を設定可能にする
+  - [x] 高さ(幅)
+  - [x] split/vsplit
+    - [-] split位置(上下左右)
+  - [-] tab/quickfix)
+
+ * [x] カーソル下単語の検索(手動)
+  - [x] キーバインドの設定でOKだろう。Llookup に渡すだけ
+
+ * [ ] カーソル下単語の検索(自動)
+  - [x] 単語単位
+  - [-] 行単位(OmegaTみたいの)
+
+ * [ ] 結果のキャッシュ機能の実装
+  - コマンド実行中にカーソル移動すると変な文字が残る
+
+ * [x] 簡単なシンタックスハイライト
+ * [ ] lookup 時のシンタックスハイライト
+
+ * [ ] ステータスラインへの情報表示
+  - [-] glossary
+  - [-] source-language
+  - [-] target-language
+  - [-] logaling-home
+  - [ ] auto-lookup の結果
+
+ * [ ] 引数の補完機能
+  - [x] Loga TASK
+  - [ ] 特定タスクのオプション(delete の --force 等)
+  - [ ] general flags
+
+ * [ ] バッファ内で編集 -> コマンド実行モードの実装
+  - [x] add
+  - [x] update
+  - [x] delete
+  # インターフェースを考える
+  [x] 区切り文字の指定を可能に
+
+ * [ ] Llookup 時の単語ハイライト
+
+ * [-] ロングネームオプション対応
+  - --glossary=PROJECT など'='区切りのやつ

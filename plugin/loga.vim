@@ -12,7 +12,7 @@ let g:loaded_loga = 1
 let s:V = vital#of('loga').import('Data.List')
 
 
-let g:loga_executable = get(g:, 'loga_executable', 'loga')
+let s:loga_executable = get(g:, 'loga_executable', 'loga')
 
 " behaviour settings
 let g:loga_result_window_hsplit = get(g:, 'loga_result_window_hsplit', 1)
@@ -21,8 +21,13 @@ let g:loga_result_window_size   = get(g:, 'loga_result_window_size', 5)
 " auto lookup
 let s:loga_enable_auto_lookup = get(g:, 'loga_enable_auto_lookup', 0)
 
+let s:loga_delimiter = get(g:, 'loga_delimiter', '(__vimloga__)')
+
 " Utilities "{{{
-"""
+function! s:debug(...)
+  let g:debug = get(g:, 'debug', [])
+  call add(g:debug, a:000)
+endfunction
 "}}}
 
 function! s:enable_auto_lookup()
@@ -64,22 +69,8 @@ function! s:output(data)
 
   let cur_bufnr = bufnr('%')
 
-  if !s:output_buffer.is_open()
-    let split = (g:loga_result_window_hsplit ? 'split' : 'vsplit')
-    silent execute g:loga_result_window_size . split
-    silent edit `=s:output_buffer.BUFNAME`
-
-    let s:output_buffer.bufnr = bufnr('%')
-  endif
-
-  let bufwinnr = bufwinnr(s:output_buffer.bufnr)
-
-  execute bufwinnr . 'wincmd w'
-  silent execute '%delete _'
-
-  setlocal buftype=nofile syntax=loga bufhidden=hide
-  setlocal noswapfile nobuflisted
-  call s:enable_syntax()
+  call s:loga.buffer.open(1)
+  call s:loga.buffer.focus()
 
   silent 0 put = a:data
 
@@ -89,38 +80,106 @@ function! s:output(data)
   redraw!
 endfunction
 
+
 """
-" judge v is an option(e.g. '-s' of '-s ja') or
-" option's value(e.g. 'ja' of '-s ja')
+" returns whether v is an option(e.g. '-s' of '-s ja') or not
 " @arg: v(string)
 " @return: 1 if v is value, 0 if not
 function! s:is_options_value(v)
   return a:v !~# '^-'
 endfunction
 
-" objects
-let s:output_buffer = {'bufnr': -1,
-      \ 'BUFNAME': '[loga output]'}
-
-function! s:output_buffer.exists() dict
-  return bufexists(self.bufnr)
-endfunction
-
-function! s:output_buffer.is_open() dict
-  return bufwinnr(self.bufnr) != -1
-endfunction
-
-" s:loga " {{{
+" objects " {{{
 let s:loga = {'executable': '',
             \ 'subcommand': '',
             \ 'args': [],
+            \ 'buffer': {},
             \ }
+
+let s:loga.buffer = {'DELIMITER': s:loga_delimiter,
+                   \ 'NAME': '[logaling]',
+                   \ 'sp': '',
+                   \ 'number': -1,
+                   \ 'filter': {}}
+
+let s:loga.buffer.sp = g:loga_result_window_size .
+                     \ (g:loga_result_window_hsplit ? 'split' : 'vsplit')
+
+function! s:loga.buffer.exists() dict
+  return bufexists(self.number)
+endfunction
+
+function! s:loga.buffer.is_open() dict
+  return bufwinnr(self.number) != -1
+endfunction
+
+function! s:loga.buffer.open(clear) dict
+  let cur_bufwinnr = bufwinnr('%')
+
+  if !self.is_open()
+    silent execute self.sp
+    silent edit `=self.NAME`
+
+    let self.number = bufnr('%')
+
+    setlocal buftype=nofile syntax=loga bufhidden=hide
+    setlocal filetype=loga
+    setlocal noswapfile nobuflisted
+    call s:enable_syntax()
+
+    execute cur_bufwinnr . 'wincmd w'
+  endif
+
+  if a:clear
+    call self.clear(cur_bufwinnr)
+  endif
+endfunction
+
+function! s:loga.buffer.clear(bufwinnr) dict
+  call self.focus()
+  execute '%delete _'
+  execute a:bufwinnr . 'wincmd w'
+endfunction
+
+function! s:loga.buffer.focus() dict
+  if self.is_open()
+    let mybufwinnr = bufwinnr(self.number)
+    if mybufwinnr != bufwinnr('%')
+      execute mybufwinnr . 'wincmd w'
+    endif
+  endif
+endfunction
+
+function! s:loga.buffer.execute(subcmd) dict range
+  for lnum in range(a:firstline, a:lastline)
+    let line = get(getbufline(self.number, lnum), 0)
+
+    if empty(line)
+      continue
+    endif
+
+    if has_key(self.filter, a:subcmd)
+      let line = self.filter[a:subcmd](line)
+    endif
+
+    let line = substitute(line, '\(\s\{11,}\|\t#\)', self.DELIMITER, 'g')
+
+    let args = split(line, self.DELIMITER)
+    let [res, err] = s:loga.Run(a:subcmd, args)
+  endfor
+endfunction
+
+function! s:loga.buffer.filter.delete(line)
+  " remove NOTE
+  return substitute(a:line, '\t#.*$', '', '')
+endfunction
+
 
 " methods
 function! s:loga.initialize(subcmd, args) dict
   call self.clear()
 
-  let self.executable = g:loga_executable
+  let self.executable = s:loga_executable
   let self.subcommand = a:subcmd
 
   if 0 < len(a:args)
@@ -167,14 +226,14 @@ function! s:loga.Loga(task, ...) dict abort
 endfunction
 
 " loga add [SOURCE TERM] [TARGET TERM] [NOTE(optional)]
-function! s:loga.Add(opt) dict abort
-  let [res, err] = self.Run('add', a:opt)
+function! s:loga.Add(src, target, ...) dict abort
+  let [res, err] = self.Run('add', a:src, a:target, a:000)
   call s:output(res)
 endfunction
 
 " loga delete [SOURCE TERM] [TARGET TERM(optional)] [--force(optional)]
-function! s:loga.Delete(opt) dict abort
-  let [res, err] = self.Run('delete', a:opt)
+function! s:loga.Delete(term, ...) dict abort
+  let [res, err] = self.Run('delete', a:term, a:000)
   call s:output(res)
 endfunction
 
@@ -191,7 +250,7 @@ function! s:loga.Lookup(word, ...) dict abort
 endfunction
 function! s:loga.AutoLookup(term) dict abort
   " do not lookup yourself
-  if s:output_buffer.bufnr == bufnr('%')
+  if s:loga.buffer.number == bufnr('%')
     return
   endif
 
@@ -216,11 +275,17 @@ endfunction
 
 " Highlight " {{{
 function! s:enable_syntax()
-  syntax match LogaTargetTerm '\s\{11,}\zs[^\t]\+\ze'
-  syntax match LogaGlossary '\t\zs(.\+)$'
+  if exists('g:syntax_on')
+    syntax match LogaGlossary '\t\zs(.\+)$'
+    syntax match LogaTargetTerm '\s\{11,}\zs[^#]\+\ze\t#'
+    syntax match LogaNote '#\s[^#]\+$'
+    execute 'syntax match LogaDelimiter "' . s:loga_delimiter . '"'
 
-  highlight link LogaTargetTerm Constant
-  highlight link LogaGlossary Type
+    highlight link LogaGlossary Type
+    highlight link LogaTargetTerm Constant
+    highlight link LogaNote Comment
+    highlight link LogaDelimiter Delimiter
+  endif
 endf
 " }}}
 
@@ -242,6 +307,7 @@ let s:gflags = ['-g', '-S', '-T', '-h',
               \ '--glossary=', '--source-language=',
               \ '--target-language=', '--logaling-home=']
 
+" Completion related " {{{
 function! s:is_task_given(line)
   let parts = split(a:line, '\s\+')
   return (0 <= index(s:loga_tasks, get(parts, 1, '')))
@@ -345,6 +411,7 @@ function! s:complete_update(A, L, P)
   return s:complete_delete(a:A, a:L, a:P)
 endfunction
 " }}}
+" }}}
 
 " commands " {{{
 command! -nargs=+ -complete=customlist,s:complete_loga
@@ -366,22 +433,37 @@ command! -nargs=* -complete=customlist,s:complete_show
 command! -nargs=+ -complete=customlist,s:complete_delete
       \ Lupdate call s:loga.Update(<f-args>)
 
+command! -range LBopen <line1>,<line2>call s:loga.buffer.open(1)
+
 command! -nargs=0 LenableAutoLookUp  call <SID>enable_auto_lookup()
 command! -nargs=0 LdisableAutoLookUp call <SID>disable_auto_lookup()
 command! -nargs=0 LtoggleAutoLookUp  call <SID>toggle_auto_lookup()
 " }}}
 
 " mappings " {{{
-nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute "Llookup ". expand("<cword>")<Cr>
-
-if !hasmapto("<Plug>(loga-lookup)")
+nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute 'Llookup '. expand("<cword>")<Cr>
+if !hasmapto('<Plug>(loga-lookup)')
   silent! map <unique> <Leader>f <Plug>(loga-lookup)
+endif
+
+execute 'inoremap <silent> <Plug>(loga-insert-delimiter) ' . s:loga_delimiter
+if !hasmapto('<Plug>(loga-insert-delimiter)')
+  silent! imap <unique> <Leader>v <Plug>(loga-insert-delimiter)
 endif
 " }}}
 
 augroup Loga
-  autocmd! CursorHold * call s:loga.AutoLookup(expand("<cword>"))
+  autocmd!
+
+  autocmd CursorHold * call s:loga.AutoLookup(expand('<cword>'))
+
+  autocmd FileType loga command! -range -nargs=0 -buffer
+        \ LBadd    <line1>,<line2>call s:loga.buffer.execute('add')
+  autocmd FileType loga command! -range -nargs=0 -buffer
+        \ LBupdate <line1>,<line2>call s:loga.buffer.execute('update')
+  autocmd FileType loga command! -range -nargs=0 -buffer
+        \ LBdelete <line1>,<line2>call s:loga.buffer.execute('delete')
 augroup END
 
 "__END__
-" vim:set ft=vim ts=2 sw=2 sts=2:
+" vim: fen fdm=marker ft=vim ts=2 sw=2 sts=2:
