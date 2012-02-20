@@ -12,7 +12,7 @@ let g:loaded_loga = 1
 let s:V = vital#of('loga').import('Data.List')
 
 
-let g:loga_executable = get(g:, 'loga_executable', 'loga')
+let s:loga_executable = get(g:, 'loga_executable', 'loga')
 
 " behaviour settings
 let g:loga_result_window_hsplit = get(g:, 'loga_result_window_hsplit', 1)
@@ -67,20 +67,11 @@ function! s:output(data)
 
   let cur_bufnr = bufnr('%')
 
-  if !s:loga.buffer.is_open()
-    let split = (g:loga_result_window_hsplit ? 'split' : 'vsplit')
-    silent execute g:loga_result_window_size . split
-    silent edit `=s:loga.buffer.NAME`
-
-    let s:loga.buffer.number = bufnr('%')
-  endif
-
-  let bufwinnr = bufwinnr(s:loga.buffer.number)
-
-  execute bufwinnr . 'wincmd w'
-  silent execute '%delete _'
+  call s:loga.buffer.open(1)
+  call s:loga.buffer.focus()
 
   setlocal buftype=nofile syntax=loga bufhidden=hide
+  setlocal filetype=loga
   setlocal noswapfile nobuflisted
   call s:enable_syntax()
 
@@ -92,9 +83,9 @@ function! s:output(data)
   redraw!
 endfunction
 
+
 """
-" judge v is an option(e.g. '-s' of '-s ja') or
-" option's value(e.g. 'ja' of '-s ja')
+" returns whether v is an option(e.g. '-s' of '-s ja') or not
 " @arg: v(string)
 " @return: 1 if v is value, 0 if not
 function! s:is_options_value(v)
@@ -108,10 +99,14 @@ let s:loga = {'executable': '',
             \ 'buffer': {},
             \ }
 
-let s:loga.buffer = {'number': -1,
-                   \ 'DELIMITER': get(g:, 'loga_delimiter', '//'),
+let s:loga.buffer = {'DELIMITER': get(g:, 'loga_delimiter', '//'),
                    \ 'NAME': '[logaling]',
+                   \ 'sp': '',
+                   \ 'number': -1,
                    \ 'filter': {}}
+
+let s:loga.buffer.sp = g:loga_result_window_size .
+                     \ (g:loga_result_window_hsplit ? 'split' : 'vsplit')
 
 function! s:loga.buffer.exists() dict
   return bufexists(self.number)
@@ -121,8 +116,35 @@ function! s:loga.buffer.is_open() dict
   return bufwinnr(self.number) != -1
 endfunction
 
-function! s:loga.buffer.filter.delete(line)
-  return substitute(a:line, '\s\+#.*$', '', '')
+function! s:loga.buffer.open(clear) dict
+  let cur_bufwinnr = bufwinnr('%')
+
+  if !self.is_open()
+    silent execute self.sp
+    silent edit `=self.NAME`
+
+    let self.number = bufnr('%')
+    execute cur_bufwinnr . 'wincmd w'
+  endif
+
+  if a:clear
+    call self.clear(cur_bufwinnr)
+  endif
+endfunction
+
+function! s:loga.buffer.clear(bufwinnr) dict
+  call self.focus()
+  execute '%delete _'
+  execute a:bufwinnr . 'wincmd w'
+endfunction
+
+function! s:loga.buffer.focus() dict
+  if self.is_open()
+    let mybufwinnr = bufwinnr(self.number)
+    if mybufwinnr != bufwinnr('%')
+      execute mybufwinnr . 'wincmd w'
+    endif
+  endif
 endfunction
 
 function! s:loga.buffer.execute(subcmd) range dict
@@ -133,7 +155,7 @@ function! s:loga.buffer.execute(subcmd) range dict
       continue
     endif
 
-    if get(self.filter, a:subcmd)
+    if has_key(self.filter, a:subcmd)
       let line = self.filter[a:subcmd](line)
     endif
 
@@ -145,16 +167,19 @@ function! s:loga.buffer.execute(subcmd) range dict
   endfor
 endfunction
 
-command! -range LBadd    <line1>,<line2>call s:loga.buffer.execute('add')
-command! -range LBupdate <line1>,<line2>call s:loga.buffer.execute('update')
-command! -range LBdelete <line1>,<line2>call s:loga.buffer.execute('delete')
+function! s:loga.buffer.filter.delete(line)
+  " remove NOTE
+  return substitute(a:line, '\s\+#.*$', '', '')
+endfunction
+
+command! -range LBopen   <line1>,<line2>call s:loga.buffer.open(1)
 
 
 " methods
 function! s:loga.initialize(subcmd, args) dict
   call self.clear()
 
-  let self.executable = g:loga_executable
+  let self.executable = s:loga_executable
   let self.subcommand = a:subcmd
 
   if 0 < len(a:args)
@@ -251,13 +276,15 @@ endfunction
 
 " Highlight " {{{
 function! s:enable_syntax()
-  syntax match LogaGlossary '\t\zs(.\+)$'
-  syntax match LogaTargetTerm '\s\{11,}\zs[^#]\+\ze'
-  syntax match LogaNote '\s#\s.\+$'
+  if exists('g:syntax_on')
+    syntax match LogaGlossary '\t\zs(.\+)$'
+    syntax match LogaTargetTerm '\s\{11,}\zs[^#]\+\ze\s\s#'
+    syntax match LogaNote '#\s[^#]\+$'
 
-  highlight link LogaGlossary Type
-  highlight link LogaTargetTerm Constant
-  highlight link LogaNote String
+    highlight link LogaGlossary Type
+    highlight link LogaTargetTerm Constant
+    highlight link LogaNote Comment
+  endif
 endf
 " }}}
 
@@ -419,7 +446,15 @@ endif
 " }}}
 
 augroup Loga
-  autocmd! CursorHold * call s:loga.AutoLookup(expand("<cword>"))
+  autocmd!
+  autocmd CursorHold * call s:loga.AutoLookup(expand("<cword>"))
+
+  autocmd FileType loga command! -range -nargs=0 -buffer
+        \ LBadd    <line1>,<line2>call s:loga.buffer.execute('add')
+  autocmd FileType loga command! -range -nargs=0 -buffer
+        \ LBupdate <line1>,<line2>call s:loga.buffer.execute('update')
+  autocmd FileType loga command! -range -nargs=0 -buffer
+        \ LBdelete <line1>,<line2>call s:loga.buffer.execute('delete')
 augroup END
 
 "__END__
