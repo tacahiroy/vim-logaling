@@ -92,6 +92,7 @@ endfunction
 " objects " {{{
 let s:loga = {'executable': '',
             \ 'subcommand': '',
+            \ 'lookupword': '',
             \ 'args': [],
             \ 'buffer': {},
             \ }
@@ -125,7 +126,7 @@ function! s:loga.buffer.open(clear) dict
     setlocal buftype=nofile syntax=loga bufhidden=hide
     setlocal filetype=logaing
     setlocal noswapfile nobuflisted
-    call s:enable_syntax()
+    call s:loga.buffer.enable_syntax()
 
     execute cur_bufwinnr . 'wincmd w'
   endif
@@ -188,6 +189,25 @@ function! s:loga.buffer.filter.delete(line)
   return substitute(a:line, '\t#.*$', '', '')
 endfunction
 
+" Highlight " {{{
+function! s:loga.buffer.enable_syntax()
+  if exists('g:syntax_on')
+    syntax case ignore
+    syntax match LogaGlossary '\t\zs(.\+)$'
+    syntax match LogaTargetTerm '\s\{11,}\zs[^#]\+\ze\(\t#\)\?'
+    syntax match LogaNote '#\s[^#]\+$'
+    execute 'syntax match LogaDelimiter "' . s:loga_delimiter . '"'
+    execute 'syntax match LogaLookupWord "' . s:loga.lookupword . '"'
+
+    highlight link LogaGlossary Type
+    highlight link LogaTargetTerm Function
+    highlight link LogaNote Comment
+    highlight link LogaDelimiter Delimiter
+    highlight LogaLookupWord gui=bold ctermbg=11
+  endif
+endf
+" }}}
+
 
 " methods
 function! s:loga.initialize(subcmd, args) dict
@@ -195,6 +215,10 @@ function! s:loga.initialize(subcmd, args) dict
 
   let self.executable = s:loga_executable
   let self.subcommand = a:subcmd
+  if a:subcmd == 'lookup'
+    call s:debug(get(a:args, 0, ''))
+    let self.lookupword = get(a:args, 0, '')[0]
+  endif
 
   if 0 < len(a:args)
     let self.args = a:args
@@ -221,6 +245,7 @@ endfunction
 function! s:loga.clear() dict
   let self.executable = ''
   let self.subcommand = ''
+  let self.lookupword = ''
   let self.args = []
 endfunction
 " }}}
@@ -262,6 +287,7 @@ function! s:loga.Lookup(word, ...) dict abort
   let [res, err] = self.Run('lookup', a:word, a:000)
   call s:output(res)
 endfunction
+
 function! s:loga.AutoLookup(term) dict abort
   " do not lookup yourself
   if s:loga.buffer.number == bufnr('%')
@@ -286,22 +312,6 @@ function! s:loga.Update(opt) dict abort
   call s:output(res)
 endfunction
 "}}}
-
-" Highlight " {{{
-function! s:enable_syntax()
-  if exists('g:syntax_on')
-    syntax match LogaGlossary '\t\zs(.\+)$'
-    syntax match LogaTargetTerm '\s\{11,}\zs[^#]\+\ze\t#'
-    syntax match LogaNote '#\s[^#]\+$'
-    execute 'syntax match LogaDelimiter "' . s:loga_delimiter . '"'
-
-    highlight link LogaGlossary Type
-    highlight link LogaTargetTerm Constant
-    highlight link LogaNote Comment
-    highlight link LogaDelimiter Delimiter
-  endif
-endf
-" }}}
 
 let s:loga_tasks = ['add',
                   \ 'config',
