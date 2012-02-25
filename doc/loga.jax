@@ -72,18 +72,24 @@ COMMANDS					*loga-commands*
 以下のコマンドは、|logaling| バッファ内でのみ使用可能です。
 
 						*loga-:LBadd* *loga-buffer-add*
-:[range]LBadd
+:LBadd [--test]
 	行の内容を引数として、'loga add' を実行します。
-	行選択されていない場合は、現在行の内容で 'loga add' を実行します。
-	複数行選択されている場合は、それぞれの行毎に 'loga add' を実行します。
+	次のパターンをデリミタとして行を分轄します。
+	NOTE: '\'(バックスラッシュ), ' '(スペース)はエスケープされます。
+
+	|g:loga_delimiter| に設定されている文字列(デフォルト:(//))
+	\s\{11,}	|source-term| と |target-term| の区切り
+	\t#		|target-term| と |note| の区切り
+
+	--test コマンドがどのように実行されるかを表示して終了します。
 
 						*loga-:LBupdate* *loga-buffer-update*
-:[range]LBupdate
+:LBupdate [--test]
 	行の内容を引数として、'loga update' を実行します。
 	その他の動作は、|:LBadd| と同様です。
 
 						*loga-:LBdelete* *loga-buffer-delete*
-:[range]LBdelete
+:LBdelete [--test]
 	行の内容を引数として、'loga delete' を実行します。
 	|note| (\t#.*$) は無視されるため、削除する必要はありません。
 	その他の動作は、|:LBadd| と同様です。
@@ -129,7 +135,7 @@ NOTE: 自動検索を開始する時間は、|updatetime|に依存するため�
 <
 
 						*g:loga_delimiter*
-行実行時の、|source-term|, |target-term|, |note| のデリミタを指定してください。
+行実行時の、|source-term|, |target-term|, |note| のデリミタを指定します。
 |Lshow|, |Llookup| の結果出力の以下のパターンも、内部的にデリミタとみなします。
 \s\{11,}	|source-term| と |target-term| の区切り
 \t#		|target-term| と |note| の区切り
@@ -145,7 +151,7 @@ MAPPINGS					*loga-mappings*
 
 						*<Plug>(loga-lookup)*
 <Plug>(loga-lookup)
-カーソル下の単語で 'loga lookup' を実行します。
+カーソル下の単語、または、選択中の文字列で 'loga lookup' を実行します。
 
 						*<Plug>(loga-insert-delimiter)*
 <Plug>(loga-insert-delimiter)
@@ -157,12 +163,13 @@ MAPPINGS					*loga-mappings*
 [グローバル]
 mode	key		mapping
 --------------------------------------------------
-N	<Leader>f	<Plug>(loga-lookup)
+n	<Leader>f	<Plug>(loga-lookup)
+v	<Leader>f	<Plug>(loga-lookup)
 
 
 [logalingバッファ]
 --------------------------------------------------
-I	<Leader>v	<Plug>(loga-insert-delimiter)
+i	<Leader>v	<Plug>(loga-insert-delimiter)
 
 
 ==============================================================================
