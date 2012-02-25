@@ -21,7 +21,7 @@ let g:loga_result_window_size   = get(g:, 'loga_result_window_size', 5)
 " auto lookup
 let s:loga_enable_auto_lookup = get(g:, 'loga_enable_auto_lookup', 0)
 
-let s:loga_delimiter = get(g:, 'loga_delimiter', '(__loga__)')
+let s:loga_delimiter = get(g:, 'loga_delimiter', '(//)')
 
 " Utilities "{{{
 function! s:debug(...)
@@ -150,8 +150,12 @@ function! s:loga.buffer.focus() dict
   endif
 endfunction
 
-function! s:loga.buffer.execute(subcmd) dict range
-  for lnum in range(a:firstline, a:lastline)
+function! s:loga.buffer.execute(subcmd, ...) dict
+  let is_test = (0 < a:0 && a:1 == '--test' ? 1 : 0)
+  let line = line('.')
+
+  " range is temporary unavailabled
+  for lnum in range(line, line)
     let line = get(getbufline(self.number, lnum), 0)
 
     if empty(line)
@@ -162,9 +166,19 @@ function! s:loga.buffer.execute(subcmd) dict range
       let line = self.filter[a:subcmd](line)
     endif
 
+    let line = substitute(line, '^\s\+', '', '')
     let line = substitute(line, '\(\s\{11,}\|\t#\)', self.DELIMITER, 'g')
 
-    let args = split(line, self.DELIMITER)
+    let args = map(split(line, self.DELIMITER), 'escape(v:val, "\\ ")')
+
+    if is_test
+      echohl Statement
+      echomsg a:subcmd . ' ' . join(args, ' ')
+      echohl None
+
+      continue
+    endif
+
     let [res, err] = s:loga.Run(a:subcmd, args)
   endfor
 endfunction
@@ -410,6 +424,10 @@ endfunction
 function! s:complete_update(A, L, P)
   return s:complete_delete(a:A, a:L, a:P)
 endfunction
+
+function! s:complete_buffer_exec(A, L, P)
+  return ['--test']
+endfunction
 " }}}
 " }}}
 
@@ -441,12 +459,25 @@ command! -nargs=0 LtoggleAutoLookUp  call <SID>toggle_auto_lookup()
 " }}}
 
 " mappings " {{{
-nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute 'Llookup '. expand("<cword>")<Cr>
-if !hasmapto('<Plug>(loga-lookup)')
+nnoremap <silent> <Plug>(loga-lookup) :<C-u>execute 'Llookup ' . expand("<cword>")<Cr>
+if !hasmapto('<Plug>(loga-lookup)', 'n')
   silent! nmap <unique> <Leader>f <Plug>(loga-lookup)
 endif
 
-execute 'inoremap <silent> <Plug>(loga-insert-delimiter) ' . s:loga_delimiter
+vnoremap <silent> <Plug>(loga-lookup) :<C-u>execute 'Llookup ' . <SID>get_visual_strs()<Cr>
+if !hasmapto('<Plug>(loga-lookup)', 'v')
+  silent! vmap <unique> <Leader>f <Plug>(loga-lookup)
+endif
+
+function! s:get_visual_strs()
+  let regun = getreg('"')
+  try
+    normal! gvy
+    return getreg('"')
+  finally
+    call setreg('"', regun)
+  endtry
+endfunction
 " }}}
 
 augroup Loga
@@ -454,17 +485,21 @@ augroup Loga
 
   autocmd CursorHold * call s:loga.AutoLookup(expand('<cword>'))
 
-  if !hasmapto('<Plug>(loga-insert-delimiter)')
+  execute 'inoremap <silent> <Plug>(loga-insert-delimiter) ' . s:loga_delimiter
+  if !hasmapto('<Plug>(loga-insert-delimiter)', 'i')
     autocmd FileType logaling
           \ silent! imap <unique> <Leader>v <Plug>(loga-insert-delimiter)
   endif
 
-  autocmd FileType logaing command! -range -nargs=0 -buffer
-        \ LBadd    <line1>,<line2>call s:loga.buffer.execute('add')
-  autocmd FileType logaing command! -range -nargs=0 -buffer
-        \ LBupdate <line1>,<line2>call s:loga.buffer.execute('update')
-  autocmd FileType logaing command! -range -nargs=0 -buffer
-        \ LBdelete <line1>,<line2>call s:loga.buffer.execute('delete')
+  autocmd FileType logaing
+        \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
+        \ LBadd    call s:loga.buffer.execute('add', <f-args>)
+  autocmd FileType logaing
+        \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
+        \ LBupdate call s:loga.buffer.execute('update', <f-args>)
+  autocmd FileType logaing
+        \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
+        \ LBdelete call s:loga.buffer.execute('delete', <f-args>)
 augroup END
 
 "__END__
