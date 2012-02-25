@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.2.0
+Version: 0.3.0
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -11,6 +11,9 @@ CONTENTS					*loga-contents*
 |loga-intro|		Introduction
 |loga-commands|		Commands
 |loga-settings|		Settings
+|loga-mappings|		Mappings
+|loga-buffer|		Logaling Buffer
+|loga-thanks|		Thanks
 |loga-license|		License
 |loga-about|		About
 
@@ -26,6 +29,10 @@ Vim 7.2 以上で動作します。
 
 ==============================================================================
 COMMANDS					*loga-commands*
+
+|logaling-command| を実行し、|logaling| バッファに表示します。
+|logaling| バッファの内容を元に、'add', 'update', 'delete' コマンドを実行する
+ことも可能です。
 
 						*loga-:Loga*
 :Loga {command} [args]
@@ -56,11 +63,49 @@ COMMANDS					*loga-commands*
 :Lshow [options]
 	'loga show' を実行します。
 
+						*loga-:LBopen*
+:LBopen
+	|logaling| バッファを開きます。
+
+
+------------------------------------------------------------------------------
+以下のコマンドは、|logaling| バッファ内でのみ使用可能です。
+
+						*loga-:LBadd* *loga-buffer-add*
+:LBadd [--test]
+	行の内容を引数として、'loga add' を実行します。
+	次のパターンをデリミタとして行を分轄します。
+	NOTE: '\'(バックスラッシュ), ' '(スペース)はエスケープされます。
+
+	|g:loga_delimiter| に設定されている文字列(デフォルト:(//))
+	\s\{11,}	|source-term| と |target-term| の区切り
+	\t#		|target-term| と |note| の区切り
+
+	--test コマンドがどのように実行されるかを表示して終了します。
+
+						*loga-:LBupdate* *loga-buffer-update*
+:LBupdate [--test]
+	行の内容を引数として、'loga update' を実行します。
+	その他の動作は、|:LBadd| と同様です。
+
+						*loga-:LBdelete* *loga-buffer-delete*
+:LBdelete [--test]
+	行の内容を引数として、'loga delete' を実行します。
+	|note| (\t#.*$) は無視されるため、削除する必要はありません。
+	その他の動作は、|:LBadd| と同様です。
+
 
 ==============================================================================
 SETTINGS					*loga-settings*
 設定により、|vim-logaling|いくつかの挙動を変更することができます。
 
+
+						*g:loga_executable*
+|loga| コマンドのパスを指定してください。|loga| コマンドが、サーチパスに存在し
+ない場合は指定する必要があります。
+>
+	let g:loga_executable = 'loga'
+<
 
 						*g:loga_result_window_hsplit*
 結果ウィンドウの分轄方向を制御することができます。
@@ -77,14 +122,107 @@ SETTINGS					*loga-settings*
 	let g:loga_result_window_size = 5
 <
 
+						*g:loga_enable_auto_lookup*
+カーソル下の単語を自動的に検索(lookup)するかどうかを指定します。
+1 に設定されている場合、自動検索が有効となります。
+>
+	let g:loga_enable_auto_lookup = 0
+<
+NOTE: 自動検索を開始する時間は、|updatetime|に依存するため、短めに設定する
+と良いかもしれません。
+>
+	set updatetime=1000
+<
+
+						*g:loga_delimiter*
+行実行時の、|source-term|, |target-term|, |note| のデリミタを指定します。
+|Lshow|, |Llookup| の結果出力の以下のパターンも、内部的にデリミタとみなします。
+\s\{11,}	|source-term| と |target-term| の区切り
+\t#		|target-term| と |note| の区切り
+
+>
+	let g:loga_delimiter = '(//)'
+<
+
 
 ==============================================================================
-LICENSE						*loga-license*
+MAPPINGS					*loga-mappings*
+以下のマッピングを提供しています。
 
-vim-logaling は、一部、quickrun.vim のソースコードを含んでいます:
+						*<Plug>(loga-lookup)*
+<Plug>(loga-lookup)
+カーソル下の単語、または、選択中の文字列で 'loga lookup' を実行します。
+
+						*<Plug>(loga-insert-delimiter)*
+<Plug>(loga-insert-delimiter)
+デリミタを入力します。デリミタは、|g:loga_delimiter| で指定された値です。
+
+
+デフォルトで設定されるキーマッピングは以下の通りです。
+
+[グローバル]
+mode	key		mapping
+--------------------------------------------------
+n	<Leader>f	<Plug>(loga-lookup)
+v	<Leader>f	<Plug>(loga-lookup)
+
+
+[logalingバッファ]
+--------------------------------------------------
+i	<Leader>v	<Plug>(loga-insert-delimiter)
+
+
+==============================================================================
+LOGALING BUFFER					*loga-buffer*
+各コマンドの実行結果は、バッファ [logaling] に表示されます。
+このバッファ内で、行の内容を引数として 'add', 'update', 'delete' コマンドを
+実行することができます。次のようにします。
+
+
+[訳語を更新する]
+  Window           ウィンドウ	# 窓の意 
+を
+  Window           ウィンドー　	# 窓の意 
+に更新したい場合
+
+1. |:Llookup| window
+2. 以下のように編集
+>
+  Window           ウィンドウ(//)ウインドー	# 窓の意 
+<
+3. 当該行で、|:LBupdate| コマンドを実行
+
+
+[用語を追加する]
+1. |:LBopen|
+2. [logaling] バッファ内で編集
+>
+coffee(//)コーヒー(//)飲料の名前
+<
+3. 当該行で、|:LBadd| コマンドを実行
+
+
+[用語を削除する]
+1. |:Llookup| coffee
+2. 当該行で、 |:LBdelete| コマンドを実行
+
+
+==============================================================================
+THANKS						*loga-thanks*
+
+vim-logaling は、実装にあたり、以下のプラグインを(程よく)参考にしました:
+
+[vim-quickrun]
 Author: thinca
 URL: https://github.com/thinca/vim-quickrun
 
+[vim-ref]
+Author: thinca
+URL: https://github.com/thinca/vim-ref
+
+
+==============================================================================
+LICENSE						*loga-license*
 
 vim-logaling は、MIT License の下でリリースされます:
 
