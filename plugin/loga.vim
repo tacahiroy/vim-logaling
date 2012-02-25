@@ -9,6 +9,9 @@ if exists('g:loaded_loga') || &cp
 endif
 let g:loaded_loga = 1
 
+let s:saved_cpo = &cpo
+set cpo&vim
+
 let s:V = vital#of('loga').import('Data.List')
 
 
@@ -126,10 +129,11 @@ function! s:loga.buffer.open(clear) dict
     setlocal buftype=nofile syntax=loga bufhidden=hide
     setlocal filetype=logaing
     setlocal noswapfile nobuflisted
-    call s:loga.buffer.enable_syntax()
-
-    execute cur_bufwinnr . 'wincmd w'
   endif
+
+  call self.focus()
+  call s:loga.buffer.enable_syntax()
+  execute cur_bufwinnr . 'wincmd w'
 
   if a:clear
     call self.clear(cur_bufwinnr)
@@ -192,18 +196,21 @@ endfunction
 " Highlight " {{{
 function! s:loga.buffer.enable_syntax()
   if exists('g:syntax_on')
+    syntax clear
     syntax case ignore
-    syntax match LogaGlossary '\t\zs(.\+)$'
-    syntax match LogaTargetTerm '\s\{11,}\zs[^#]\+\ze\(\t#\)\?'
-    syntax match LogaNote '#\s[^#]\+$'
-    execute 'syntax match LogaDelimiter "' . s:loga_delimiter . '"'
-    execute 'syntax match LogaLookupWord "' . s:loga.lookupword . '"'
+    syntax match LogaGlossary /\t\zs(.\+)$/
+    syntax match LogaTargetTerm /\s\{11,}\zs[^#]\+\ze\(\t#\)\?/
+    syntax match LogaNote /#\s[^#]\+$/
+    execute 'syntax match LogaDelimiter /' . s:loga_delimiter . '/'
+    if !empty(s:loga.lookupword)
+      execute 'syntax match LogaLookupWord /' . s:loga.lookupword . '/'
+    endif
 
     highlight link LogaGlossary Type
     highlight link LogaTargetTerm Function
     highlight link LogaNote Comment
     highlight link LogaDelimiter Delimiter
-    highlight LogaLookupWord gui=bold ctermbg=11
+    highlight link LogaLookupWord IncSearch
   endif
 endf
 " }}}
@@ -511,6 +518,9 @@ augroup Loga
         \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
         \ LBdelete call s:loga.buffer.execute('delete', <f-args>)
 augroup END
+
+let &cpo = s:saved_cpo
+unlet s:saved_cpo
 
 "__END__
 " vim: fen fdm=marker ft=vim ts=2 sw=2 sts=2:
