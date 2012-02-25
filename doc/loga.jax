@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.4.0
+Version: 0.4.1
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -16,11 +16,13 @@ CONTENTS					*loga-contents*
 |loga-thanks|		Thanks
 |loga-license|		License
 |loga-about|		About
+|loga-history|		History
+
 
 ==============================================================================
 INTRODUCTION					*loga-intro*
 
-*vim-logaling* は、シンプルな logaling-command のラッパーです。
+vim-logaling は、シンプルな logaling-command のラッパーです。
 Vim 7.2 以上で動作します。
 
 このプラグインは、'compatible' がセットされていない場合に限り動作します。
@@ -30,8 +32,8 @@ Vim 7.2 以上で動作します。
 ==============================================================================
 COMMANDS					*loga-commands*
 
-|logaling-command| を実行し、|logaling| バッファに表示します。
-|logaling| バッファの内容を元に、'add', 'update', 'delete' コマンドを実行する
+logaling-command を実行し、[logaling] バッファに表示します。
+logaling バッファの内容を元に、'add', 'update', 'delete' コマンドを実行する
 ことも可能です。
 
 						*loga-:Loga*
@@ -65,11 +67,11 @@ COMMANDS					*loga-commands*
 
 						*loga-:LBopen*
 :LBopen
-	|logaling| バッファを開きます。
+	[logaling] バッファを開きます。
 
 
 ------------------------------------------------------------------------------
-以下のコマンドは、|logaling| バッファ内でのみ使用可能です。
+以下のコマンドは、[logaling] バッファ内でのみ使用可能です。
 
 						*loga-:LBadd* *loga-buffer-add*
 :LBadd [--test]
@@ -78,8 +80,8 @@ COMMANDS					*loga-commands*
 	NOTE: '\'(バックスラッシュ), ' '(スペース)はエスケープされます。
 
 	|g:loga_delimiter| に設定されている文字列(デフォルト:(//))
-	\s\{11,}	|source-term| と |target-term| の区切り
-	\t#		|target-term| と |note| の区切り
+	\s\{11,}	source-term と target-term の区切り
+	\t#		target-term と note の区切り
 
 	--test コマンドがどのように実行されるかを表示して終了します。
 
@@ -91,17 +93,17 @@ COMMANDS					*loga-commands*
 						*loga-:LBdelete* *loga-buffer-delete*
 :LBdelete [--test]
 	行の内容を引数として、'loga delete' を実行します。
-	|note| (\t#.*$) は無視されるため、削除する必要はありません。
+	'note' (\t#.*$) は無視されるため、削除する必要はありません。
 	その他の動作は、|:LBadd| と同様です。
 
 
 ==============================================================================
 SETTINGS					*loga-settings*
-設定により、|vim-logaling|いくつかの挙動を変更することができます。
+設定により、vim-logaling のいくつかの挙動を変更することができます。
 
 
 						*g:loga_executable*
-|loga| コマンドのパスを指定してください。|loga| コマンドが、サーチパスに存在し
+loga コマンドのパスを指定してください。loga コマンドが、サーチパスに存在し
 ない場合は指定する必要があります。
 >
 	let g:loga_executable = 'loga'
@@ -128,17 +130,17 @@ SETTINGS					*loga-settings*
 >
 	let g:loga_enable_auto_lookup = 0
 <
-NOTE: 自動検索を開始する時間は、|updatetime|に依存するため、短めに設定する
+NOTE: 自動検索を開始する時間は、|updatetime| に依存するため、短めに設定する
 と良いかもしれません。
 >
 	set updatetime=1000
 <
 
 						*g:loga_delimiter*
-行実行時の、|source-term|, |target-term|, |note| のデリミタを指定します。
-|Lshow|, |Llookup| の結果出力の以下のパターンも、内部的にデリミタとみなします。
-\s\{11,}	|source-term| と |target-term| の区切り
-\t#		|target-term| と |note| の区切り
+行実行時の、source-term, target-term, note のデリミタを指定します。
+|:Lshow|, |:Llookup| の結果出力の以下のパターンも、内部的にデリミタとみなします。
+\s\{11,}	source-term と target-term の区切り
+\t#		target-term と note の区切り
 
 >
 	let g:loga_delimiter = '(//)'
@@ -253,5 +255,15 @@ ABOUT                                           *loga-about*
 最新版は、GitHub より入手できます:
 
 https://github.com/tacahiroy/vim-logaling
+
+
+==============================================================================
+HISTORY						*loga-history*
+
+v0.4.1		Fix:  highlight only 1st look up word problem
+v0.4.0		New: look-up word highlight.
+v0.3.0		New: execute 'add', 'update' and 'delete' command with line 
+		     contents as arguments.
+v0.1.0		New: minimum functions are implemented.
 
  vim:tw=78:et:ts=8:ft=help:norl:
