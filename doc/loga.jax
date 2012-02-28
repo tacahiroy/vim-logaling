@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.4.1
+Version: 0.4.2
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -77,7 +77,7 @@ logaling バッファの内容を元に、'add', 'update', 'delete' コマンド
 :LBadd [--test]
 	行の内容を引数として、'loga add' を実行します。
 	次のパターンをデリミタとして行を分轄します。
-	NOTE: '\'(バックスラッシュ), ' '(スペース)はエスケープされます。
+	NOTE: 次の文字はエスケープされます: '\(){}<> '
 
 	|g:loga_delimiter| に設定されている文字列(デフォルト:(//))
 	\s\{11,}	source-term と target-term の区切り
@@ -260,7 +260,9 @@ https://github.com/tacahiroy/vim-logaling
 ==============================================================================
 HISTORY						*loga-history*
 
-v0.4.1		Fix:  highlight only 1st look up word problem
+v0.4.2		Fix: :LBadd doesn't work problem if source-term contains
+		     white-space
+v0.4.1		Fix: highlight only 1st look up word problem
 v0.4.0		New: look-up word highlight.
 v0.3.0		New: execute 'add', 'update' and 'delete' command with line 
 		     contents as arguments.
