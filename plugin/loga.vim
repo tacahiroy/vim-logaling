@@ -174,7 +174,8 @@ function! s:loga.buffer.execute(subcmd, ...) dict
     let line = substitute(line, '^\s\+', '', '')
     let line = substitute(line, '\(\s\{11,}\|\t#\)', self.DELIMITER, 'g')
 
-    let args = map(split(line, self.DELIMITER), 'escape(v:val, "\\ ")')
+    " FIXME: escape is not perfect
+    let args = map(split(line, self.DELIMITER), 'escape(v:val, "\\ (){}<>")')
 
     if is_test
       echohl Statement
