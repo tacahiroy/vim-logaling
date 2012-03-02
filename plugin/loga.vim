@@ -14,14 +14,11 @@ set cpo&vim
 
 let s:V = vital#of('loga').import('Data.List')
 
-
 let s:loga_executable = get(g:, 'loga_executable', 'loga')
 
 " behaviour settings
 let g:loga_result_window_hsplit = get(g:, 'loga_result_window_hsplit', 1)
 let g:loga_result_window_size   = get(g:, 'loga_result_window_size', 5)
-
-" auto lookup
 let s:loga_enable_auto_lookup = get(g:, 'loga_enable_auto_lookup', 0)
 
 let s:loga_delimiter = get(g:, 'loga_delimiter', '(//)')
@@ -30,11 +27,6 @@ let s:loga_delimiter = get(g:, 'loga_delimiter', '(//)')
 function! s:debug(...)
   let g:debug = get(g:, 'debug', [])
   call add(g:debug, a:000)
-endfunction
-
-function! s:get_glossaries()
-  let [res, err] = s:loga.Run('list', ['--no-pager', '--no-color'])
-  return split(res, '\n')
 endfunction
 "}}}
 
@@ -206,7 +198,7 @@ function! s:loga.buffer.enable_syntax()
     syntax case ignore
     syntax match LogaTargetTerm /\s\{11,}\zs[^#]\+\ze\t#\?/
     syntax match LogaNote /#\s[^#]\+[\t$]/
-    execute 'syntax keyword LogaGlossary ' . join(map(s:get_glossaries(), '"\\t" . v:val'), ' ')
+    execute 'syntax keyword LogaGlossary ' . join(map(s:loga.glossaries(), '"\\t" . v:val'), ' ')
     execute 'syntax match LogaDelimiter /' . s:loga_delimiter . '/'
     if !empty(s:loga.lookupword)
       execute 'syntax match LogaLookupWord /' . s:loga.lookupword . '/'
@@ -260,6 +252,11 @@ function! s:loga.clear() dict
   let self.subcommand = ''
   let self.lookupword = ''
   let self.args = []
+endfunction
+
+function! s:loga.glossaries() dict
+  let [res, err] = self.Run('list', ['--no-pager', '--no-color'])
+  return split(res, '\n')
 endfunction
 " }}}
 
