@@ -1,8 +1,8 @@
 " loga.vim - A logaling-command wrapper
 " Maintainer: Takahiro YOSHIHARA <tacahiroy```AT```gmail.com>
 " License: MIT License
-" Version: 0.4.2
-" supported logaling-command version 0.1.2
+" Version: 0.4.3-013
+" supported logaling-command version 0.1.3
 
 if exists('g:loaded_loga') || &cp
   finish
@@ -30,6 +30,11 @@ let s:loga_delimiter = get(g:, 'loga_delimiter', '(//)')
 function! s:debug(...)
   let g:debug = get(g:, 'debug', [])
   call add(g:debug, a:000)
+endfunction
+
+function! s:get_glossaries()
+  let [res, err] = s:loga.Run('list', ['--no-pager', '--no-color'])
+  return split(res, '\n')
 endfunction
 "}}}
 
@@ -199,9 +204,9 @@ function! s:loga.buffer.enable_syntax()
   if exists('g:syntax_on')
     syntax clear
     syntax case ignore
-    syntax match LogaGlossary /\t\zs(.\+)$/
-    syntax match LogaTargetTerm /\s\{11,}\zs[^#]\+\ze\(\t#\)\?/
-    syntax match LogaNote /#\s[^#]\+$/
+    syntax match LogaTargetTerm /\s\{11,}\zs[^#]\+\ze\t#\?/
+    syntax match LogaNote /#\s[^#]\+[\t$]/
+    execute 'syntax keyword LogaGlossary ' . join(map(s:get_glossaries(), '"\\t" . v:val'), ' ')
     execute 'syntax match LogaDelimiter /' . s:loga_delimiter . '/'
     if !empty(s:loga.lookupword)
       execute 'syntax match LogaLookupWord /' . s:loga.lookupword . '/'
