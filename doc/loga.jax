@@ -260,6 +260,7 @@ https://github.com/tacahiroy/vim-logaling
 ==============================================================================
 HISTORY						*loga-history*
 
+v0.4.3-013	New: supports logaling-command-0.1.3
 v0.4.2		Fix: :LBadd doesn't work problem if source-term contains
 		     white-space
 v0.4.1		Fix: highlight only 1st look up word problem
