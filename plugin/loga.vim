@@ -124,7 +124,7 @@ function! s:loga.buffer.open(clear) dict
     let self.number = bufnr('%')
 
     setlocal buftype=nofile syntax=loga bufhidden=hide
-    setlocal filetype=logaing
+    setlocal filetype=logaling
     setlocal noswapfile nobuflisted
   endif
 
