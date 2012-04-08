@@ -18,7 +18,7 @@ let s:loga_executable = get(g:, 'loga_executable', 'loga')
 
 " behaviour settings
 let g:loga_result_window_hsplit = get(g:, 'loga_result_window_hsplit', 1)
-let g:loga_result_window_size   = get(g:, 'loga_result_window_size', 5)
+let g:loga_result_window_size = get(g:, 'loga_result_window_size', 5)
 let s:loga_enable_auto_lookup = get(g:, 'loga_enable_auto_lookup', 0)
 
 let s:loga_delimiter = get(g:, 'loga_delimiter', '(//)')
@@ -464,6 +464,8 @@ command! -nargs=1 -complete=customlist,s:complete_help
 
 command! -nargs=+ -complete=customlist,s:complete_lookup
       \ Llookup call s:loga.Lookup(<f-args>)
+command! -nargs=+ -complete=customlist,s:complete_lookup
+      \ Llookupd call s:loga.Lookup(<f-args>, '--dict', <f-args>)
 
 command! -nargs=* -complete=customlist,s:complete_show
       \ Lshow call s:loga.Show(<f-args>)
@@ -484,12 +486,12 @@ if !hasmapto('<Plug>(loga-lookup)', 'n')
   silent! nmap <unique> <Leader>f <Plug>(loga-lookup)
 endif
 
-vnoremap <silent> <Plug>(loga-lookup) :<C-u>execute 'Llookup ' . <SID>get_visual_strs()<Cr>
+vnoremap <silent> <Plug>(loga-lookup) :<C-u>execute 'Llookup ' . <SID>get_visualed()<Cr>
 if !hasmapto('<Plug>(loga-lookup)', 'v')
   silent! vmap <unique> <Leader>f <Plug>(loga-lookup)
 endif
 
-function! s:get_visual_strs()
+function! s:get_visualed()
   let regun = getreg('"')
   try
     normal! gvy
