@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.4.3-013
+Version: 0.4.3-014
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -22,7 +22,8 @@ CONTENTS					*loga-contents*
 ==============================================================================
 INTRODUCTION					*loga-intro*
 
-vim-logaling は、シンプルな logaling-command のラッパーです。
+vim-logaling は、シンプルな logaling-command のフロントエンドです。
+現在、logaling-command 0.1.4 に対応しています。
 Vim 7.2 以上で動作します。
 
 このプラグインは、'compatible' がセットされていない場合に限り動作します。
@@ -182,9 +183,9 @@ LOGALING BUFFER					*loga-buffer*
 
 
 [訳語を更新する]
-  Window           ウィンドウ	# 窓の意 
+  Window           ウィンドウ	# 窓の意
 を
-  Window           ウィンドー　	# 窓の意 
+  Window           ウィンドー　	# 窓の意
 に更新したい場合
 
 1. |:Llookup| window
@@ -260,7 +261,8 @@ https://github.com/tacahiroy/vim-logaling
 ==============================================================================
 HISTORY						*loga-history*
 
-v0.4.3-013	New: supports logaling-command-0.1.3
+v0.4.3-014	New: supports logaling-command 0.1.4
+v0.4.3-013	New: supports logaling-command 0.1.3
 v0.4.2		Fix: :LBadd doesn't work problem if source-term contains
 		     white-space
 v0.4.1		Fix: highlight only 1st look up word problem

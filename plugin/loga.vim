@@ -1,8 +1,8 @@
 " loga.vim - A logaling-command wrapper
 " Maintainer: Takahiro YOSHIHARA <tacahiroy```AT```gmail.com>
 " License: MIT License
-" Version: 0.4.3-013
-" supported logaling-command version 0.1.3
+" Version: 0.4.3-014
+" supported logaling-command version 0.1.4
 
 if exists('g:loaded_loga') || &cp
   finish
