@@ -513,13 +513,13 @@ augroup Loga
           \ silent! imap <unique> <Leader>v <Plug>(loga-insert-delimiter)
   endif
 
-  autocmd FileType logaing
+  autocmd FileType logaling
         \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
         \ LBadd    call s:loga.buffer.execute('add', <f-args>)
-  autocmd FileType logaing
+  autocmd FileType logaling
         \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
         \ LBupdate call s:loga.buffer.execute('update', <f-args>)
-  autocmd FileType logaing
+  autocmd FileType logaling
         \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
         \ LBdelete call s:loga.buffer.execute('delete', <f-args>)
 augroup END
