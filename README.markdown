@@ -20,7 +20,7 @@ Related links
 --------------
 
 [GitHub](https://github.com/tacahiroy/vim-logaling)  
-[Logaling Home](http://logaling.github.com)
+[logaling-command](http://logaling.github.com)
 
 License
 -------

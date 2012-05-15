@@ -23,10 +23,10 @@ CONTENTS					*loga-contents*
 INTRODUCTION					*loga-intro*
 
 vim-logaling は、シンプルな logaling-command のフロントエンドです。
-現在、logaling-command 0.1.4 に対応しています。
+現在、logaling-command 0.1.5 に対応しています。
 Vim 7.2 以上で動作します。
 
-このプラグインは、'compatible' がセットされていない場合に限り動作します。
+このプラグインは、|compatible| がセットされていない場合に限り動作します。
 {Vi は、いくつかの機能を有していません。}
 
 
@@ -265,7 +265,7 @@ https://github.com/tacahiroy/vim-logaling
 ==============================================================================
 HISTORY						*loga-history*
 
-v0.4.5-014	Fix: |:LBadd|, |:LBupdate| and |:LBdelete| commands are disabled
+v0.4.5-015	Fix: |:LBadd|, |:LBupdate| and |:LBdelete| commands are disabled
                      problem
 v0.4.4-014	New: supports `lookup --dict' option: |Llookupd|
 v0.4.3-014	New: supports logaling-command 0.1.4
