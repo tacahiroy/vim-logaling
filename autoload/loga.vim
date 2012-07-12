@@ -263,6 +263,11 @@ endfunction
 
 " commands "{{{
 function! s:Loga.Run(...) dict abort
+  if !executable(s:loga_executable)
+    echoerr printf('cannot execute "%s".', s:loga_executable)
+    return
+  endif
+
   let subcmd = get(a:000, 0)
 
   call self.initialize(subcmd, s:parse_argument(s:V.flatten(a:000[1:])))
