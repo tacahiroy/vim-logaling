@@ -15,11 +15,15 @@ If you use [pathogen.vim](https://github.com/tpope/vim-pathogen), you just execu
     cd ~/.vim/bundle
     git clone git://github.com/tacahiroy/vim-logaling.git
 
+If you don't use either, you must copy 'autoload', 'plugin' and 'doc'
+ directories in $HOME/.vim directory.
+On windows, you must copy to $HOME/vimfiles directory instead of $HOME/.vim.
 
 Related links
 --------------
 
-[GitHub](https://github.com/tacahiroy/vim-logaling)  
+[GitHub/vim-logaling](https://github.com/tacahiroy/vim-logaling)  
+[vim.org/vim-logaling](http://www.vim.org/scripts/script.php?script_id=4144)  
 [logaling-command](http://logaling.github.com)
 
 License
