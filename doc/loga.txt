@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.2.0
+Version: 0.4.5-015
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -11,81 +11,233 @@ CONTENTS					*loga-contents*
 |loga-intro|		Introduction
 |loga-commands|		Commands
 |loga-settings|		Settings
+|loga-mappings|		Mappings
+|loga-buffer|		Logaling Buffer
+|loga-thanks|		Thanks
 |loga-license|		License
 |loga-about|		About
+|loga-history|		History
+
 
 ==============================================================================
 INTRODUCTION					*loga-intro*
 
-*vim-logaling* is a simple wrapper of logaling-command.
-It requires Vim 7.2 or later.
+vim-logaling is a simple front-end of logaling-command.
+This currently supports logaling-command 0.1.5 or earlier.
 
 This plugin only works if 'compatible' is not set.
-{Vi does not have any of these features.}
+{Vi doesn't support any features.}
 
 
 ==============================================================================
 COMMANDS					*loga-commands*
 
+These commands execute logaling-command and show result into [logaling] buffer.
+You can execute 'add', 'update' and 'delete' using [logaling] buffer lines.
+
 						*loga-:Loga*
 :Loga {command} [args]
-	Run any logaling-command whatever you want.
-	Similar to :!loga {command} [args]
+	You can run arbitrary logaling-command.
+	It's similar to :!loga {command} [options].
 
 						*loga-:Ladd* *loga-add*
 :Ladd {source term} {target term} [note]
-	Just execute command 'loga add'.
+	This command runs 'loga add'.
 
 						*loga-:Lupdate* *loga-update*
 :Lupdate {source term} {target term} {new target term} [note] [options]
-	Just execute command 'loga update'.
+	This command runs 'loga update'.
 
 						*loga-:Ldelete* *loga-delete*
 :Ldelete {source term} [target term] [--force] [options]
-	Just execute command 'loga delete'.
+	This command runs 'loga delete'.
 
 						*loga-:Lhelp* *loga-help*
 :Lhelp {command}
-	Just execute command 'loga help'.
+	This command runs 'loga help'.
 
 						*loga-:Llookup* *loga-lookup*
 :Llookup {term} [options]
-	Just execute command 'loga lookup'.
+	This command runs 'loga lookup'.
+
+						*loga-:Llookupd* *loga-lookupd*
+:Llookupd {term} [options]
+	This command runs 'loga lookup' with '--dict' option.
 
 						*loga-:Lshow* *loga-show*
 :Lshow [options]
-	Just execute command 'loga show'.
+	This command runs 'loga show'.
+
+						*loga-:LBopen*
+:LBopen
+	This command opens [logaling] buffer and you can execute these commands
+	using buffer lines.
+
+
+------------------------------------------------------------------------------
+These commands can be used in the [logaling].
+
+						*loga-:LBadd* *loga-buffer-add*
+:LBadd [--test]
+	Run 'loga add' using line contents as arguments.
+	It splits line using following patterns as delimiter.
+	NOTE: These characters will be escaped:
+
+	'\(){}<> '	Shell special characters.
+	A string is set to |g:loga_delimiter|. (default:(//))
+	\s\{11,}	The delimiter between SOURCE-TERM and TARGET-TERM.
+	\t#		The delimiter between TARGET-TERM and NOTE.
+
+	--test It only shows command will be run. (dry-run)
+
+						*loga-:LBupdate* *loga-buffer-update*
+:LBupdate [--test]
+	Run 'loga update' using line contents as arguments.
+	The other behaviour is same as |:LBadd|.
+
+						*loga-:LBdelete* *loga-buffer-delete*
+:LBdelete [--test]
+	Run 'loga delete' using line contents as arguments.
+	You don't have to delete 'NOTE' (\t#.*$) because it is ignored.
+	The other behaviour is same as |:LBadd|.
 
 
 ==============================================================================
 SETTINGS					*loga-settings*
-These variables control behaviour of the |vim-logaling|.
+You can customise the behaviour of vim-logaling.
 
 
-						*g:loga_result_window_hsplit* 
-This variable controls split direction of a result window.
-If it's 1, window is split horizontal. If not, vertical.
+						*g:loga_executable*
+Please specify path to loga command. If the loga command doesn't locate command
+search path it has to be specified.
+default: ''
+>
+	let g:loga_executable = '/path/to/loga'
+<
+
+						*g:loga_result_window_hsplit*
+This controls direction of the result window.
+1 split horizontal
+0 split vertical
+default: 1
 >
 	let g:loga_result_window_hsplit = 1
 <
 
-						*g:loga_result_window_size* 
-This variable controls size of a result window.
-Only an integer can be specified.
+						*g:loga_result_window_size*
+This controls size of the result window.
+It can be specified only integer.
+default: 5
 >
 	let g:loga_result_window_size = 5
 <
 
+						*g:loga_enable_auto_lookup*
+This controls enable/disable auto look up the word under cursor.
+If 1, auto look up is enabled.
+default: 0 (disabled)
+>
+	let g:loga_enable_auto_lookup = 0
+<
+NOTE: It might be better set small value to |updatetime|.
+>
+	set updatetime=1000
+<
+
+						*g:loga_delimiter*
+This is specified delimiter when run command using line contents (|:LBadd|,
+|:LBupdate| and |:LBdelete|).
+Following patterns, the result of |:Lshow| and |:Llookup|, are treated as a
+ delimiter internally.
+\s\{11,}	A delimiter between SOURCE-TERM and TARGET-TERM.
+\t#		A delimiter between TARGET-TERM and NOTE.
+default: (//)
+
+>
+	let g:loga_delimiter = '(//)'
+<
+
+
+==============================================================================
+MAPPINGS					*loga-mappings*
+These mappings are provided.
+
+						*<Plug>(loga-lookup)*
+<Plug>(loga-lookup)
+Run 'loga lookup' using a word under the cursor or visual selected word.
+
+						*<Plug>(loga-insert-delimiter)*
+<Plug>(loga-insert-delimiter)
+Put the delimiter specified in |g:loga_delimiter|.
+
+
+These key mappings are set by default:
+
+[Global]
+mode	key		mapping
+--------------------------------------------------
+n	<Leader>f	<Plug>(loga-lookup)
+v	<Leader>f	<Plug>(loga-lookup)
+
+
+[logaling buffer]
+--------------------------------------------------
+i	<Leader>v	<Plug>(loga-insert-delimiter)
+
+
+==============================================================================
+LOGALING BUFFER					*loga-buffer*
+The result of each command is shown on [logaling] buffer.
+You can run 'add', 'update' and 'delete' command with line contents as
+ arguments.
+
+[update a TERM]
+If you want to update
+  Window           fenêtre	# this is a note
+to
+  Window           la fenêtre　	# this is a note
+
+1. |:Llookup| window
+2. edit likes below
+>
+  Window           fenêtre(//)la fenêtre	# this is a note
+<
+3. Run |LBupdate| command on target line.
+
+
+[add a TERM]
+1. |:LBopen|
+2. edit like following in [logaling] buffer
+>
+  coffee(//)café(//)un nom de boisson
+<
+3. Run |:LBadd| command on target line.
+
+
+[delete a TERM]
+1. |:Llookup| coffee
+2. Run |:LBdelete| command on target line.
+
+
+==============================================================================
+THANKS						*loga-thanks*
+
+I read following plugins as reference when I implemented vim-logaling:
+
+[vim-quickrun]
+Author: thinca
+URL: https://github.com/thinca/vim-quickrun
+
+[vim-ref]
+Author: thinca
+URL: https://github.com/thinca/vim-ref
+
+Thanks:)
 
 ==============================================================================
 LICENSE						*loga-license*
 
-vim-logaling contains a part of source code of quickrun.vim:
-Author: thinca
-URL: https://github.com/thinca/vim-quickrun
-
-
-vim-logaling is released under the MIT License:
+vim-logaling is released under the MIT License.
 
 Copyright 2012 Takahiro YOSHIHARA
 
@@ -111,8 +263,25 @@ software.
 ==============================================================================
 ABOUT                                           *loga-about*
 
-You can get the latest version on GitHub:
+The latest version is available GitHub:
 
 https://github.com/tacahiroy/vim-logaling
+
+
+==============================================================================
+HISTORY						*loga-history*
+
+v0.4.5-015	Fix: |:LBadd|, |:LBupdate| and |:LBdelete| commands are disabled
+                     problem
+v0.4.4-014	New: supports `lookup --dict' option: |Llookupd|
+v0.4.3-014	New: supports logaling-command 0.1.4
+v0.4.3-013	New: supports logaling-command 0.1.3
+v0.4.2		Fix: :LBadd doesn't work problem if source-term contains
+		     white-space
+v0.4.1		Fix: highlight only 1st look up word problem
+v0.4.0		New: look-up word highlight.
+v0.3.0		New: execute 'add', 'update' and 'delete' command with line 
+		     contents as arguments.
+v0.1.0		New: minimum functions are implemented.
 
  vim:tw=78:et:ts=8:ft=help:norl:
