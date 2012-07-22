@@ -7,7 +7,7 @@ You can use logaling-command on Vim.
 How to install
 -------------
 If you use [Vundle](https://github.com/gmarik/vundle.git) it's very easy, you just run command `:BundleInstall tacahiroy/vim-logaling`
-inside vim.  
+on Vim.  
 And also put `Bundle 'tacahiroy/vim-logaling'` into `.vimrc`.
 
 If you use [pathogen.vim](https://github.com/tpope/vim-pathogen), you just execute following:
@@ -16,7 +16,7 @@ If you use [pathogen.vim](https://github.com/tpope/vim-pathogen), you just execu
     git clone git://github.com/tacahiroy/vim-logaling.git
 
 If you don't use either, you must copy 'autoload', 'plugin' and 'doc'
- directories in $HOME/.vim directory.
+ directories in $HOME/.vim directory.  
 On windows, you must copy to $HOME/vimfiles directory instead of $HOME/.vim.
 
 Related links
