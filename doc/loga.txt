@@ -220,6 +220,11 @@ to
 
 
 ==============================================================================
+TODO						*loga-todo*
+- I'm not sure this plugin can be run on Windows or not
+
+
+==============================================================================
 THANKS						*loga-thanks*
 
 I read following plugins as reference when I implemented vim-logaling:

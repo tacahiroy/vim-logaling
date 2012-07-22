@@ -39,19 +39,19 @@ logaling バッファの内容を元に、'add', 'update', 'delete' コマンド
 
 						*loga-:Loga*
 :Loga {command} [args]
-	任意の logaling-command でも実行可能です。
+	任意の logaling-command を実行可能です。
 	:!loga {command} [options] と似たようなものです。
 
 						*loga-:Ladd* *loga-add*
-:Ladd {source term} {target term} [note]
+:Ladd {SOURCE-TERM} {TARGET-TERM} [NOTE]
 	'loga add' を実行します。
 
 						*loga-:Lupdate* *loga-update*
-:Lupdate {source term} {target term} {new target term} [note] [options]
+:Lupdate {SOURCE-TERM} {TARGET-TERM} {new TARGET-TERM} [NOTE] [options]
 	'loga update' を実行します。
 
 						*loga-:Ldelete* *loga-delete*
-:Ldelete {source term} [target term] [--force] [options]
+:Ldelete {SOURCE-TERM} [TARGET-TERM] [--force] [options]
 	'loga delete' を実行します。
 
 						*loga-:Lhelp* *loga-help*
@@ -82,11 +82,12 @@ logaling バッファの内容を元に、'add', 'update', 'delete' コマンド
 :LBadd [--test]
 	行の内容を引数として、'loga add' を実行します。
 	次のパターンをデリミタとして行を分轄します。
-	NOTE: 次の文字はエスケープされます: '\(){}<> '
+	NOTE: 次の文字はエスケープされます:
 
+	'\(){}<> '	シェル的に意味のある文字
 	|g:loga_delimiter| に設定されている文字列(デフォルト:(//))
-	\s\{11,}	source-term と target-term の区切り
-	\t#		target-term と note の区切り
+	\s\{11,}	SOURCE-TERM と TARGET-TERM の区切り
+	\t#		TARGET-TERM と NOTE の区切り
 
 	--test コマンドがどのように実行されるかを表示して終了します。
 
@@ -98,7 +99,7 @@ logaling バッファの内容を元に、'add', 'update', 'delete' コマンド
 						*loga-:LBdelete* *loga-buffer-delete*
 :LBdelete [--test]
 	行の内容を引数として、'loga delete' を実行します。
-	'note' (\t#.*$) は無視されるため、削除する必要はありません。
+	'NOTE' (\t#.*$) は無視されるため、削除する必要はありません。
 	その他の動作は、|:LBadd| と同様です。
 
 
@@ -142,10 +143,10 @@ NOTE: 自動検索を開始する時間は、|updatetime| に依存するため�
 <
 
 						*g:loga_delimiter*
-行実行時の、source-term, target-term, note のデリミタを指定します。
+行実行時の、SOURCE-TERM, TARGET-TERM, NOTE のデリミタを指定します。
 |:Lshow|, |:Llookup| の結果出力の以下のパターンも、内部的にデリミタとみなします。
-\s\{11,}	source-term と target-term の区切り
-\t#		target-term と note の区切り
+\s\{11,}	SOURCE-TERM と TARGET-TERM の区切り
+\t#		TARGET-TERM と NOTE の区切り
 
 >
 	let g:loga_delimiter = '(//)'
@@ -204,7 +205,7 @@ LOGALING BUFFER					*loga-buffer*
 1. |:LBopen|
 2. [logaling] バッファ内で編集
 >
-coffee(//)コーヒー(//)飲料の名前
+  coffee(//)コーヒー(//)飲料の名前
 <
 3. 当該行で、|:LBadd| コマンドを実行
 
@@ -212,6 +213,11 @@ coffee(//)コーヒー(//)飲料の名前
 [用語を削除する]
 1. |:Llookup| coffee
 2. 当該行で、 |:LBdelete| コマンドを実行
+
+
+==============================================================================
+TODO						*loga-todo*
+- Windows で動くかどうかわかりません
 
 
 ==============================================================================
@@ -226,6 +232,8 @@ URL: https://github.com/thinca/vim-quickrun
 [vim-ref]
 Author: thinca
 URL: https://github.com/thinca/vim-ref
+
+感謝^3^
 
 
 ==============================================================================
@@ -270,7 +278,7 @@ v0.4.5-015	Fix: |:LBadd|, |:LBupdate| and |:LBdelete| commands are disabled
 v0.4.4-014	New: supports `lookup --dict' option: |Llookupd|
 v0.4.3-014	New: supports logaling-command 0.1.4
 v0.4.3-013	New: supports logaling-command 0.1.3
-v0.4.2		Fix: :LBadd doesn't work problem if source-term contains
+v0.4.2		Fix: :LBadd doesn't work problem if SOURCE-TERM contains
 		     white-space
 v0.4.1		Fix: highlight only 1st look up word problem
 v0.4.0		New: look-up word highlight.
