@@ -4,6 +4,14 @@ vim-logaling
 This is a logaling-command wrapper.
 You can use logaling-command on Vim.
 
+Dependency
+----------
+Needless to say, you're a user of logaling-command.  
+If not, you have to install logaling-command.
+
+    gem install logaling-command
+
+
 How to install
 -------------
 If you use [Vundle](https://github.com/gmarik/vundle.git) it's very easy, you just run command `:BundleInstall tacahiroy/vim-logaling`
