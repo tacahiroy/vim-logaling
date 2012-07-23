@@ -1,7 +1,7 @@
 " autoload/loga.vim
 " Maintainer: Takahiro YOSHIHARA <tacahiroy```AT```gmail.com>
 " License: The MIT License
-" Version: 0.4.5-015
+" Version: 0.4.6-015
 " supported logaling-command version 0.1.5
 
 let s:saved_cpo = &cpo

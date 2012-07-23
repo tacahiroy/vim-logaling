@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.4.5-015
+Version: 0.4.6-015
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
