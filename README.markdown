@@ -30,9 +30,10 @@ On windows, you must copy to $HOME/vimfiles directory instead of $HOME/.vim.
 Related links
 --------------
 
-[GitHub/vim-logaling](https://github.com/tacahiroy/vim-logaling)  
-[vim.org/vim-logaling](http://www.vim.org/scripts/script.php?script_id=4144)  
-[logaling-command](http://logaling.github.com)
+- [GitHub/vim-logaling](https://github.com/tacahiroy/vim-logaling)
+- [vim.org/vim-logaling](http://www.vim.org/scripts/script.php?script_id=4144)
+- [GitHub/logaling-command](https://github.com/logaling/logaling-command)
+- [logaling web site (ja)](http://logaling.github.com)
 
 License
 -------
