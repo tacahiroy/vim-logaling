@@ -16,7 +16,6 @@ CONTENTS					*loga-contents*
 |loga-thanks|		Thanks
 |loga-license|		License
 |loga-about|		About
-|loga-history|		History
 
 
 ==============================================================================
@@ -273,23 +272,5 @@ The latest version is available GitHub:
 
 https://github.com/tacahiroy/vim-logaling
 
-
-==============================================================================
-HISTORY						*loga-history*
-
-v0.4.8-017	New: supports logaling-commands version 0.1.7
-v0.4.7-016	Fix: |:Llookupd| doesn't work problem
-v0.4.5-015	Fix: |:LBadd|, |:LBupdate| and |:LBdelete| commands are disabled
-                     problem
-v0.4.4-014	New: supports `lookup --dict' option: |Llookupd|
-v0.4.3-014	New: supports logaling-command version 0.1.4
-v0.4.3-013	New: supports logaling-command version 0.1.3
-v0.4.2		Fix: :LBadd doesn't work problem if SOURCE-TERM contains
-		     white-space
-v0.4.1		Fix: highlight only 1st look up word problem
-v0.4.0		New: look-up word highlight.
-v0.3.0		New: execute 'add', 'update' and 'delete' command with line 
-		     contents as arguments.
-v0.1.0		New: minimum functions are implemented.
 
  vim:tw=78:et:ts=8:ft=help:norl:
