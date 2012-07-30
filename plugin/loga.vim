@@ -157,7 +157,7 @@ command! -nargs=1 -complete=customlist,s:complete_help
 command! -nargs=+ -complete=customlist,s:complete_lookup
       \ Llookup call s:loga.Lookup(<f-args>)
 command! -nargs=+ -complete=customlist,s:complete_lookup
-      \ Llookupd call s:loga.Lookup(<f-args>, '--dict', <f-args>)
+      \ Llookupd call s:loga.Lookup('--dict', <f-args>)
 
 command! -nargs=* -complete=customlist,s:complete_show
       \ Lshow call s:loga.Show(<f-args>)
