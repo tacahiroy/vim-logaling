@@ -1,7 +1,7 @@
 *loga.txt*  A logaling-command wrapper
 
 vim-logaling
-Version: 0.4.6-015
+Version: 0.4.7-016
 Author:  tacahiroy <https://github.com/tacahiroy>
 
 
@@ -23,7 +23,7 @@ CONTENTS					*loga-contents*
 INTRODUCTION					*loga-intro*
 
 vim-logaling is a simple front-end of logaling-command.
-This currently supports logaling-command 0.1.5 or earlier.
+This currently supports logaling-command 0.1.6 or less
 
 This plugin only works if 'compatible' is not set.
 {Vi doesn't support any features.}
@@ -276,6 +276,7 @@ https://github.com/tacahiroy/vim-logaling
 ==============================================================================
 HISTORY						*loga-history*
 
+v0.4.7-016	Fix: |:Llookupd| doesn't work problem
 v0.4.5-015	Fix: |:LBadd|, |:LBupdate| and |:LBdelete| commands are disabled
                      problem
 v0.4.4-014	New: supports `lookup --dict' option: |Llookupd|
