@@ -1,8 +1,8 @@
 " autoload/loga.vim
 " Maintainer: Takahiro YOSHIHARA <tacahiroy```AT```gmail.com>
 " License: The MIT License
-" Version: 0.4.6-015
-" supported logaling-command version 0.1.5
+" Version: 0.4.7-017
+" supported logaling-command version 0.1.7
 
 let s:saved_cpo = &cpo
 set cpo&vim
@@ -25,6 +25,7 @@ function! s:debug(...)
 endfunction
 "}}}
 
+" private " {{{
 function! s:enable_auto_lookup()
   let s:loga_enable_auto_lookup = 1
 endfunction
@@ -70,7 +71,7 @@ function! s:output(data)
   silent 0 put = a:data
 
   call cursor(1, 1)
-  execute bufwinnr(cur_bufnr). 'wincmd w'
+  execute bufwinnr(cur_bufnr) . 'wincmd w'
 
   redraw!
 endfunction
@@ -82,6 +83,10 @@ endfunction
 " @return: 1 if v is value, 0 if not
 function! s:is_options_value(v)
   return a:v !~# '^-'
+endfunction
+
+function! s:def_syntax(kind, name, pat)
+  execute printf('syntax %s %s /%s/', a:kind, a:name, a:pat)
 endfunction
 
 " public " {{{
@@ -153,7 +158,7 @@ function! s:Loga.buffer.focus() dict
   endif
 endfunction
 
-function! s:Loga.buffer.execute(subcmd, ...) dict
+function! s:Loga.buffer.execute(subcmd, ...) range dict
   let is_test = (0 < a:0 && a:1 == '--test' ? 1 : 0)
   let line = line('.')
 
@@ -170,7 +175,7 @@ function! s:Loga.buffer.execute(subcmd, ...) dict
     endif
 
     let line = substitute(line, '^\s\+', '', '')
-    let line = substitute(line, '\(\s\{11,}\|\t#\)', self.DELIMITER, 'g')
+    let line = substitute(line, '\(\s*\t\|\t#\)', self.DELIMITER, 'g')
 
     " FIXME: escape is not perfect
     let args = map(split(line, self.DELIMITER), 'escape(v:val, "\\ (){}<>")')
@@ -192,17 +197,23 @@ function! s:Loga.buffer.filter.delete(line)
   return substitute(a:line, '\t#.*$', '', '')
 endfunction
 
+function! s:Loga.target_term_syntax_pattern() dict
+  return '\s*\t\zs[^#]\+\ze\t#\?'
+endfunction
+
 " Highlight " {{{
 function! s:Loga.buffer.enable_syntax()
   if exists('g:syntax_on')
     syntax clear
     syntax case ignore
-    syntax match LogaTargetTerm /\s\{11,}\zs[^#]\+\ze\t#\?/
-    syntax match LogaNote /#\s[^#]\+[\t$]/
-    execute 'syntax keyword LogaGlossary ' . join(map(s:Loga.glossaries(), '"\\t" . v:val'), ' ')
-    execute 'syntax match LogaDelimiter /' . s:loga_delimiter . '/'
+
+    call s:def_syntax('match', 'LogaTargetTerm', s:Loga.target_term_syntax_pattern())
+    call s:def_syntax('match', 'LogaNote', '#\s[^#]\+[\t$]')
+    call s:def_syntax('keyword', 'LogaGlossary', join(map(s:Loga.glossaries(), '"\\t" . v:val') , ' '))
+    call s:def_syntax('match', 'LogaDelimiter', s:loga_delimiter)
+
     if !empty(s:Loga.lookupword)
-      execute 'syntax match LogaLookupWord /' . s:Loga.lookupword . '/'
+      call s:def_syntax('match', 'LogaLookupWord', s:Loga.lookupword)
     endif
 
     highlight link LogaGlossary Type

@@ -2,8 +2,8 @@
 " A logaling-command wrapper
 " Maintainer: Takahiro YOSHIHARA <tacahiroy```AT```gmail.com>
 " License: The MIT License
-" Version: 0.4.6-015
-" supported logaling-command version 0.1.5
+" Version: 0.4.7-017
+" supported logaling-command version 0.1.7
 
 if exists('g:loaded_loga') || &cp
   finish
@@ -206,14 +206,14 @@ augroup Loga
   endif
 
   autocmd FileType logaling
-        \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
-        \ LBadd    call s:loga.buffer.execute('add', <f-args>)
+        \ command! -nargs=? -buffer -range -complete=customlist,s:complete_buffer_exec
+        \ LBadd    <line1>,<line2>:call s:loga.buffer.execute('add', <f-args>)
   autocmd FileType logaling
-        \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
-        \ LBupdate call s:loga.buffer.execute('update', <f-args>)
+        \ command! -nargs=? -buffer -range -complete=customlist,s:complete_buffer_exec
+        \ LBupdate <line1>,<line2>:call s:loga.buffer.execute('update', <f-args>)
   autocmd FileType logaling
-        \ command! -nargs=? -buffer -complete=customlist,s:complete_buffer_exec
-        \ LBdelete call s:loga.buffer.execute('delete', <f-args>)
+        \ command! -nargs=? -buffer -range -complete=customlist,s:complete_buffer_exec
+        \ LBdelete <line1>,<line2>:call s:loga.buffer.execute('delete', <f-args>)
 augroup END
 
 let &cpo = s:saved_cpo
